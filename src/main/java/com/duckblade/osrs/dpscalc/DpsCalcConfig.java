@@ -5,7 +5,7 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 
 @ConfigGroup("dpscalculator")
-public interface DPSCalculatorConfig extends Config
+public interface DpsCalcConfig extends Config
 {
 	@ConfigItem(
 			keyName = "showMinimenuEntry",

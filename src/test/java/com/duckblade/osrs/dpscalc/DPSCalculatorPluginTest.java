@@ -7,7 +7,7 @@ public class DPSCalculatorPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(DPSCalculatorPlugin.class);
+		ExternalPluginManager.loadBuiltin(DpsCalcPlugin.class);
 		RuneLite.main(args);
 	}
 }
