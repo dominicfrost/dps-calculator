@@ -4,6 +4,7 @@ import java.util.Map;
 import lombok.Builder;
 import lombok.Data;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.ItemID;
 
 @Data
 @Builder
@@ -23,26 +24,35 @@ public class EquipmentStats
 	private final int prayer;
 	private final int speed;
 
-	public static EquipmentStats fromMap(Map<EquipmentInventorySlot, ItemStats> slotMap)
+	private static void addValues(EquipmentStatsBuilder builder, ItemStats i)
 	{
+		if (i == null)
+			return;
+
+		builder.accuracyStab += i.getEquipStats().getAccuracyStab();
+		builder.accuracySlash += i.getEquipStats().getAccuracySlash();
+		builder.accuracyCrush += i.getEquipStats().getAccuracyCrush();
+		builder.accuracyMagic += i.getEquipStats().getAccuracyMagic();
+		builder.accuracyRanged += i.getEquipStats().getAccuracyRanged();
+		builder.strengthMelee += i.getEquipStats().getStrengthMelee();
+		builder.strengthRanged += i.getEquipStats().getStrengthRanged();
+		builder.strengthMagic += i.getEquipStats().getStrengthMagic();
+		builder.prayer += i.getEquipStats().getPrayer();
+	}
+	
+	public static EquipmentStats fromMap(Map<EquipmentInventorySlot, ItemStats> slotMap, WeaponMode weaponMode, ItemStats tbpDarts)
+	{
+		ItemStats weapon = slotMap.get(EquipmentInventorySlot.WEAPON);
 		EquipmentStatsBuilder b = EquipmentStats.builder();
-		for (ItemStats i : slotMap.values())
-		{
-			if (i == null)
-				continue;
-			
-			b.accuracyStab += i.getEquipStats().getAccuracyStab();
-			b.accuracySlash += i.getEquipStats().getAccuracySlash();
-			b.accuracyCrush += i.getEquipStats().getAccuracyCrush();
-			b.accuracyMagic += i.getEquipStats().getAccuracyMagic();
-			b.accuracyRanged += i.getEquipStats().getAccuracyRanged();
-			b.strengthMelee += i.getEquipStats().getStrengthMelee();
-			b.strengthRanged += i.getEquipStats().getStrengthRanged();
-			b.strengthMagic += i.getEquipStats().getStrengthMagic();
-			b.prayer += i.getEquipStats().getPrayer();
-		}
+		slotMap.values().forEach(i -> addValues(b, i));
 		
-		b.speed = slotMap.get(EquipmentInventorySlot.WEAPON).getEquipStats().getSpeed();
+		b.speed = weapon == null ? 4 : weapon.getEquipStats().getSpeed();
+		if (weaponMode != null && weaponMode.getCombatFocus() == CombatFocus.RAPID)
+			b.speed -= 1;
+		
+		if (weapon != null && weapon.getItemId() == ItemID.TOXIC_BLOWPIPE)
+			addValues(b, tbpDarts);
+		
 		return b.build();
 	}
 

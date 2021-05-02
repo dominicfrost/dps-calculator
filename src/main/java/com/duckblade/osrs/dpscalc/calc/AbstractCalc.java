@@ -31,7 +31,7 @@ public abstract class AbstractCalc
 		if (input.getWeaponMode().getMode() == CombatMode.MELEE)
 			return input.getEquipmentFlags().contains(EquipmentFlags.SALVE_E) ? 2 : 1;
 		else if (input.getEquipmentFlags().contains(EquipmentFlags.SALVE_I))
-			return input.getEquipmentFlags().contains(EquipmentFlags.SALVE_EI) ? 2 : 1;
+			return 1;
 
 		return 0;
 	}

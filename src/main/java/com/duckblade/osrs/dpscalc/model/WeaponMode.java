@@ -12,16 +12,16 @@ public class WeaponMode
 	private final CombatMode mode;
 	
 	@Getter
-	private final CombatFocus style;
+	private final CombatFocus combatFocus;
 	
 	@Getter
 	private final MeleeStyle meleeStyle;
 
-	public WeaponMode(String displayName, CombatMode mode, CombatFocus style, MeleeStyle meleeStyle)
+	public WeaponMode(String displayName, CombatMode mode, CombatFocus combatFocus, MeleeStyle meleeStyle)
 	{
 		this.displayName = displayName;
 		this.mode = mode;
-		this.style = style;
+		this.combatFocus = combatFocus;
 		this.meleeStyle = meleeStyle;
 		assert mode != CombatMode.MELEE || meleeStyle != null;
 	}

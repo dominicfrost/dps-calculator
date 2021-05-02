@@ -50,6 +50,9 @@ public class ItemDataManager
 			}
 		}
 	}
+	
+	public static final String[] DART_NAMES = {"Dragon Darts", "Rune Darts", "Adamant Darts", "Mithril Darts", "Black Darts", "Steel Darts", "Iron Darts", "Bronze Darts"};
+	public static final int[] DART_IDS = {11230, 811, 810, 809, 3093, 808, 807, 806};
 
 	public String[] getAllItemNames(final int targetSlot)
 	{
@@ -63,14 +66,14 @@ public class ItemDataManager
 		).toArray(i -> new String[i + 1]);
 	}
 
-	public Optional<ItemStats> getItemStatsByName(String npcName)
+	public ItemStats getItemStatsByName(String npcName)
 	{
-		return Optional.ofNullable(ALL_STATS_BY_NAME.get(npcName));
+		return ALL_STATS_BY_NAME.get(npcName);
 	}
 
-	public Optional<ItemStats> getItemStatsById(int npcId)
+	public ItemStats getItemStatsById(int npcId)
 	{
-		return Optional.ofNullable(ALL_STATS.get(npcId));
+		return ALL_STATS.get(npcId);
 	}
 
 }

@@ -59,7 +59,6 @@ public class DpsCalculatorPanel extends PluginPanel
 	private final MenuPanelNavEntry skillsNav;
 	private final SkillsPanel skillsPanel;
 
-	private final JLabel dpsHeader;
 	private final JLabel dpsValue;
 	private static final String DPS_CALC_FAIL = "???";
 	private static final DecimalFormat DPS_FORMAT = new DecimalFormat("#.###");
@@ -127,7 +126,7 @@ public class DpsCalculatorPanel extends PluginPanel
 
 		Font originalBold = FontManager.getRunescapeBoldFont();
 		Font dpsFont = originalBold.deriveFont(originalBold.getSize() * 2f);
-		dpsHeader = new JLabel("DPS:", JLabel.CENTER);
+		JLabel dpsHeader = new JLabel("DPS:", JLabel.CENTER);
 		dpsHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
 		dpsHeader.setForeground(Color.white);
 		dpsHeader.setFont(dpsFont);
@@ -173,7 +172,7 @@ public class DpsCalculatorPanel extends PluginPanel
 		WeaponMode weaponMode = equipmentPanel.getWeaponMode();
 		Map<EquipmentInventorySlot, ItemStats> equipment = equipmentPanel.getEquipment();
 		List<EquipmentFlags> equipmentFlags = EquipmentFlags.fromMap(equipment, rlItemManager);
-		EquipmentStats equipmentStats = EquipmentStats.fromMap(equipment);
+		EquipmentStats equipmentStats = EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts());
 		Map<Skill, Integer> playerSkills = skillsPanel.getSkills();
 		Map<Skill, Integer> playerBoosts = skillsPanel.getBoosts();
 

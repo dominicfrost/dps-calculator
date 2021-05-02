@@ -28,9 +28,9 @@ public class MeleeDpsCalc extends AbstractCalc
 		str += input.getPlayerBoosts().get(Skill.STRENGTH);
 		str = (int) (str * 1.0f); // TODO prayers
 		
-		if (input.getWeaponMode().getStyle() == CombatFocus.AGGRESSIVE)
+		if (input.getWeaponMode().getCombatFocus() == CombatFocus.AGGRESSIVE)
 			str += 3;
-		else if (input.getWeaponMode().getStyle() == CombatFocus.CONTROLLED)
+		else if (input.getWeaponMode().getCombatFocus() == CombatFocus.CONTROLLED)
 			str += 1;
 		str += 8;
 		
@@ -46,9 +46,9 @@ public class MeleeDpsCalc extends AbstractCalc
 		att += input.getPlayerBoosts().get(Skill.ATTACK);
 		att = (int) (att * 1.0f); // TODO prayers
 		
-		if (input.getWeaponMode().getStyle() == CombatFocus.ACCURATE)
+		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			att += 3;
-		else if (input.getWeaponMode().getStyle() == CombatFocus.CONTROLLED)
+		else if (input.getWeaponMode().getCombatFocus() == CombatFocus.CONTROLLED)
 			att += 1;
 		att += 8;
 		
@@ -58,7 +58,7 @@ public class MeleeDpsCalc extends AbstractCalc
 		return att;
 	}
 	
-	private int maximumHit(CalcInput input)
+	private int maxHit(CalcInput input)
 	{
 		int maxHit = effectiveStrengthLevel(input) * (input.getEquipmentStats().getStrengthMelee() + 64);
 		maxHit += 320;
@@ -117,7 +117,7 @@ public class MeleeDpsCalc extends AbstractCalc
 	public float damagePerTick(CalcInput input)
 	{
 		float weaponSpeed = (float) input.getEquipmentStats().getSpeed();
-		float dmgPerHit = maximumHit(input) * hitChance(input) / 2f;
+		float dmgPerHit = maxHit(input) * hitChance(input) / 2f;
 		return dmgPerHit / weaponSpeed;
 	}
 	

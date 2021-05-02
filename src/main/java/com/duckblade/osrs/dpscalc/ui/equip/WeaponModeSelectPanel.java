@@ -4,6 +4,7 @@ import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
 import java.awt.BorderLayout;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 public class WeaponModeSelectPanel extends JPanel
@@ -15,7 +16,10 @@ public class WeaponModeSelectPanel extends JPanel
 	public WeaponModeSelectPanel()
 	{
 		setLayout(new BorderLayout());
-		comboBox = new JComboBox<>();
+		
+		add(new JLabel("Weapon Mode"), BorderLayout.NORTH);
+		
+		comboBox = new JComboBox<>(new String[] {""});
 		add(comboBox, BorderLayout.CENTER);
 	}
 
@@ -33,6 +37,9 @@ public class WeaponModeSelectPanel extends JPanel
 		comboBox.removeAllItems();
 		comboBox.addItem("");
 
+		if (currentWeapon == null)
+			return;
+		
 		currentWeapon.getWeaponType()
 				.getWeaponModes()
 				.forEach(wm -> comboBox.addItem(wm.getDisplayName()));
