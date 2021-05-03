@@ -33,7 +33,6 @@ public class MenuPanelNavEntry extends JPanel
 		NAVIGATION_ICON = new ImageIcon(image);
 	}
 
-	private final JLabel titleLabel;
 	private final JLabel descriptionLabel;
 
 	public MenuPanelNavEntry(String title, String description, Runnable onClick)
@@ -53,7 +52,7 @@ public class MenuPanelNavEntry extends JPanel
 		splitPanel.setOpaque(false);
 		add(splitPanel, BorderLayout.CENTER);
 
-		titleLabel = new JLabel(title);
+		JLabel titleLabel = new JLabel(title);
 		titleLabel.setForeground(Color.white);
 		titleLabel.setFont(FontManager.getRunescapeBoldFont());
 		splitPanel.add(titleLabel);

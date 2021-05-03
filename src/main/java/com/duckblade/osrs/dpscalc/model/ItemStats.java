@@ -1,7 +1,6 @@
 package com.duckblade.osrs.dpscalc.model;
 
 import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,7 +10,6 @@ public class ItemStats
 {
 
 	@Data
-	@AllArgsConstructor
 	@NoArgsConstructor
 	public static class EquipStats
 	{

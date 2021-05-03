@@ -92,15 +92,15 @@ public class SkillsPanel extends JPanel
 
 	public boolean isReady()
 	{
-		return !Stream.of(attack, strength, defense, magic, ranged, prayer).anyMatch(sb -> sb.getValue() == 0);
+		return Stream.of(attack, strength, defense, magic, ranged, prayer).noneMatch(sb -> sb.getValue() == 0);
 	}
 	
 	public String getSummary()
 	{
-		if (!isReady())
-			return "Not Set";
+		if (isReady())
+			return "Set";
 
-		return "Set";
+		return "Not Set";
 	}
 
 	private static Map<Skill, Integer> buildMap(int a, int s, int d, int m, int r, int p)

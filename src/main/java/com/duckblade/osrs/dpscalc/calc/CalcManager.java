@@ -1,49 +1,34 @@
 package com.duckblade.osrs.dpscalc.calc;
 
-import com.duckblade.osrs.dpscalc.model.CalcInput;
+import com.duckblade.osrs.dpscalc.model.CombatMode;
 import javax.inject.Inject;
-import javax.inject.Singleton;
+import lombok.RequiredArgsConstructor;
 
-@Singleton
+@RequiredArgsConstructor(onConstructor = @__(@Inject)) // for sake of UITest, better than @Inject on the fields
 public class CalcManager
 {
 	
-	private static final float SECONDS_PER_TICK = 0.6f;
-
-	private MageDpsCalc mageDpsCalc;
-	private MeleeDpsCalc meleeDpsCalc;
-	private RangedDpsCalc rangedDpsCalc;
-
-	@Inject
-	public CalcManager(MageDpsCalc mageDpsCalc, MeleeDpsCalc meleeDpsCalc, RangedDpsCalc rangedDpsCalc)
+	private final MageDpsCalc mageDpsCalc;
+	private final MeleeDpsCalc meleeDpsCalc;
+	private final RangedDpsCalc rangedDpsCalc;
+	
+	private AbstractCalc getCalc(CombatMode mode)
 	{
-		this.mageDpsCalc = mageDpsCalc;
-		this.meleeDpsCalc = meleeDpsCalc;
-		this.rangedDpsCalc = rangedDpsCalc;
+		switch (mode)
+		{
+			case MAGE:
+				return mageDpsCalc;
+			case MELEE:
+				return meleeDpsCalc;
+			default:
+				return rangedDpsCalc;
+		}
 	}
 
 	public float calculateDPS(CalcInput input)
 	{
-		assert input.getWeaponMode() != null;
-		assert input.getWeaponMode().getMode() != null;
-
-		float dpt;
-		switch (input.getWeaponMode().getMode())
-		{
-			case MAGE:
-				dpt = mageDpsCalc.damagePerTick(input);
-				break;
-			case MELEE:
-				dpt = meleeDpsCalc.damagePerTick(input);
-				break;
-			case RANGED:
-				dpt = rangedDpsCalc.damagePerTick(input);
-				break;
-			default:
-				throw new IllegalArgumentException("Missing weapon mode");
-		}
-
-		return dpt / SECONDS_PER_TICK;
+		return getCalc(input.getCombatMode())
+				.calculateDPS(input);
 	}
 	
 

@@ -1,20 +1,26 @@
 package com.duckblade.osrs.dpscalc.ui.equip;
 
 import com.duckblade.osrs.dpscalc.ItemDataManager;
+import com.duckblade.osrs.dpscalc.calc.EquipmentRequirement;
+import com.duckblade.osrs.dpscalc.model.CombatMode;
 import com.duckblade.osrs.dpscalc.model.EquipmentStats;
 import com.duckblade.osrs.dpscalc.model.ItemStats;
+import com.duckblade.osrs.dpscalc.model.Spell;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
-import java.awt.BorderLayout;
+import com.duckblade.osrs.dpscalc.model.WeaponType;
+import com.duckblade.osrs.dpscalc.ui.util.CustomJComboBox;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -36,14 +42,11 @@ public class EquipmentPanel extends JPanel
 	private final Map<EquipmentInventorySlot, EquipmentSlotPanel> slotPanels;
 	private final EquipmentSlotPanel weaponSlot;
 
-	private final JPanel tbpDartSelectPanel;
-	private final JComboBox<String> tbpDartSelect;
-	
-	private final WeaponModeSelectPanel weaponModeSelect;
-	
-	private final JPanel totalsPanel;
+	private final CustomJComboBox<ItemStats> tbpDartSelectPanel;
+	private final CustomJComboBox<WeaponMode> weaponModeSelect;
+	private final CustomJComboBox<Spell> spellSelect;
 
-	private int lastWeapon;
+	private final JPanel totalsPanel;
 
 	@Inject
 	public EquipmentPanel(Client client, ItemManager rlItemManager, ItemDataManager itemDataManager)
@@ -58,7 +61,7 @@ public class EquipmentPanel extends JPanel
 
 		JButton loadFromClientButton = new JButton("Load From Client");
 		loadFromClientButton.addActionListener(e -> loadFromClient());
-		loadFromClientButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+		loadFromClientButton.setAlignmentX(CENTER_ALIGNMENT);
 		add(loadFromClientButton);
 
 		add(Box.createVerticalStrut(10));
@@ -66,63 +69,58 @@ public class EquipmentPanel extends JPanel
 		JPanel slotPanel = new JPanel();
 		slotPanel.setMinimumSize(new Dimension(PluginPanel.PANEL_WIDTH, 0));
 		slotPanel.setLayout(new BoxLayout(slotPanel, BoxLayout.Y_AXIS));
-		slotPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		slotPanel.setAlignmentX(CENTER_ALIGNMENT);
 		add(slotPanel);
 
 		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
-			EquipmentSlotPanel innerPanel = new EquipmentSlotPanel(this.rlItemManager, this.itemDataManager, slot, this);
+			EquipmentSlotPanel innerPanel = new EquipmentSlotPanel(this.rlItemManager, this.itemDataManager, slot, this::onEquipmentChanged);
 			this.slotPanels.put(slot, innerPanel);
 			slotPanel.add(innerPanel);
 			slotPanel.add(Box.createRigidArea(new Dimension(1, 5)));
 		}
 		weaponSlot = slotPanels.get(EquipmentInventorySlot.WEAPON);
-		lastWeapon = -1;
 
 		add(Box.createVerticalStrut(5));
 
-		tbpDartSelectPanel = new JPanel();
-		tbpDartSelectPanel.setLayout(new BorderLayout());
-//		tbpDartSelectPanel.setVisible(false);
+		tbpDartSelectPanel = new CustomJComboBox<>(itemDataManager.getAllDarts(), ItemStats::getName, "Blowpipe Darts");
+		tbpDartSelectPanel.setCallback(this::onEquipmentChanged);
+		tbpDartSelectPanel.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH - 25, 50));
+		tbpDartSelectPanel.setAlignmentX(CENTER_ALIGNMENT);
+		tbpDartSelectPanel.setVisible(false);
+		tbpDartSelectPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 		add(tbpDartSelectPanel);
-		
-		tbpDartSelectPanel.add(new JLabel("Blowpipe Darts"), BorderLayout.NORTH);
-				
-		String[] dartList = new String[ItemDataManager.DART_NAMES.length + 1];
-		dartList[0] = "";
-		System.arraycopy(ItemDataManager.DART_NAMES, 0, dartList, 1, ItemDataManager.DART_NAMES.length);
-		
-		tbpDartSelect = new JComboBox<>(dartList);
-		tbpDartSelect.addActionListener(e -> onEquipmentChanged());
-		tbpDartSelectPanel.add(tbpDartSelect, BorderLayout.CENTER);
 
-		add(Box.createVerticalStrut(5));
-
-		weaponModeSelect = new WeaponModeSelectPanel();
-		weaponModeSelect.setWeapon(null);
+		weaponModeSelect = new CustomJComboBox<>(WeaponType.UNARMED.getWeaponModes(), WeaponMode::getDisplayName, "Weapon Mode");
+		weaponModeSelect.setCallback(this::onEquipmentChanged);
+		weaponModeSelect.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH - 25, 50));
+		weaponModeSelect.setAlignmentX(CENTER_ALIGNMENT);
 		add(weaponModeSelect);
+
+		add(Box.createVerticalStrut(10));
+
+		spellSelect = new CustomJComboBox<>(Collections.emptyList(), Spell::getDisplayName, "Spell");
+		spellSelect.setCallback(this::onEquipmentChanged);
+		spellSelect.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH - 25, 50));
+		spellSelect.setAlignmentX(CENTER_ALIGNMENT);
+		spellSelect.setVisible(false);
+		spellSelect.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+		add(spellSelect);
 
 		add(Box.createVerticalStrut(10));
 
 		totalsPanel = new JPanel();
 		totalsPanel.setMinimumSize(new Dimension(PluginPanel.PANEL_WIDTH, 0));
 		totalsPanel.setLayout(new BoxLayout(totalsPanel, BoxLayout.Y_AXIS));
-		totalsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		totalsPanel.setAlignmentX(CENTER_ALIGNMENT);
 		add(totalsPanel);
 
-		rebuildTotals(false);
+		rebuildTotals();
 	}
 
 	public void loadFromClient()
 	{
 		// TODO
-	}
-	
-	public void enter()
-	{
-		ItemStats currentWeapon = weaponSlot.getValue();
-		tbpDartSelectPanel.setVisible(currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE);
-		// todo magic spell visibility
 	}
 
 	public WeaponMode getWeaponMode()
@@ -139,11 +137,12 @@ public class EquipmentPanel extends JPanel
 
 	public ItemStats getTbpDarts()
 	{
-		int dartIx = tbpDartSelect.getSelectedIndex();
-		if (dartIx == 0)
-			return null;
-		else
-			return itemDataManager.getItemStatsById(ItemDataManager.DART_IDS[dartIx - 1]);
+		return tbpDartSelectPanel.getValue();
+	}
+	
+	public Spell getSpell()
+	{
+		return spellSelect.getValue();
 	}
 
 	public void preload(Map<EquipmentInventorySlot, ItemStats> items)
@@ -153,10 +152,44 @@ public class EquipmentPanel extends JPanel
 
 	public void onEquipmentChanged()
 	{
-		ItemStats currentWeapon = weaponSlot.getValue();
-		weaponModeSelect.setWeapon(currentWeapon);
-		tbpDartSelectPanel.setVisible(currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE);
-		rebuildTotals(true);
+		SwingUtilities.invokeLater(() ->
+		{
+			ItemStats currentWeapon = weaponSlot.getValue();
+
+			boolean dartSelectVisible = currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE;
+			tbpDartSelectPanel.setVisible(dartSelectVisible);
+
+			List<WeaponMode> modes = currentWeapon == null ? WeaponType.UNARMED.getWeaponModes() : currentWeapon.getWeaponType().getWeaponModes();
+			weaponModeSelect.setItems(modes);
+
+			WeaponMode weaponMode = getWeaponMode();
+			if (weaponMode != null && weaponMode.getMode() == CombatMode.MAGE)
+			{
+				assert currentWeapon != null;
+				Map<EquipmentInventorySlot, ItemStats> equipment = getEquipment();
+				boolean ahrimsDamned = EquipmentRequirement.AHRIMS.isSatisfied(equipment) && EquipmentRequirement.AMULET_DAMNED.isSatisfied(equipment);
+				List<Spell> availableSpells = Spell.forWeapon(currentWeapon.getItemId(), ahrimsDamned);
+				spellSelect.setItems(availableSpells);
+				if (availableSpells.size() == 1)
+				{
+					// don't prompt for a spell if there's only one available (powered staves/salamanders)
+					spellSelect.setValue(availableSpells.get(0));
+					spellSelect.setVisible(false);
+				}
+				else
+				{
+					spellSelect.setVisible(true);
+				}
+			}
+			else
+			{
+				spellSelect.setVisible(false);
+			}
+
+			rebuildTotals();
+			revalidate();
+			repaint();
+		});
 	}
 
 	private JLabel buildStatLabel(String statName, int stat)
@@ -167,7 +200,7 @@ public class EquipmentPanel extends JPanel
 		return label;
 	}
 
-	private void rebuildTotals(boolean redraw)
+	private void rebuildTotals()
 	{
 		totalsPanel.removeAll();
 
@@ -183,31 +216,29 @@ public class EquipmentPanel extends JPanel
 		totalsPanel.add(Box.createVerticalStrut(10));
 
 		totalsPanel.add(buildStatLabel("Melee Strength", stats.getStrengthMelee()));
-		totalsPanel.add(buildStatLabel("Melee Strength", stats.getStrengthRanged()));
-		totalsPanel.add(buildStatLabel("Melee Strength", stats.getStrengthMagic()));
+		totalsPanel.add(buildStatLabel("Ranged Strength", stats.getStrengthRanged()));
+		totalsPanel.add(buildStatLabel("Magic Strength", stats.getStrengthMagic()));
 
 		totalsPanel.add(Box.createVerticalStrut(10));
 
 		totalsPanel.add(buildStatLabel("Weapon Speed", stats.getSpeed()));
 		totalsPanel.add(buildStatLabel("Prayer", stats.getPrayer()));
-
-		if (redraw)
-			SwingUtilities.invokeLater(() ->
-			{
-				revalidate();
-				repaint();
-			});
 	}
 
 	public boolean isReady()
 	{
 		// ensure selected dart if using tbp
 		ItemStats currentWeapon = weaponSlot.getValue();
-		if (currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE && tbpDartSelect.getSelectedIndex() == 0)
+		if (currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE && getTbpDarts() == null)
 			return false;
 
 		// ensure selected attack style (wearing nothing is fine)
-		return weaponModeSelect.getValue() != null;
+		WeaponMode weaponMode = weaponModeSelect.getValue();
+		if (weaponMode == null)
+			return false;
+		
+		// ensure spell is selected if needed
+		return weaponMode.getMode() != CombatMode.MAGE || spellSelect.getValue() != null;
 	}
 
 	public String getSummary()

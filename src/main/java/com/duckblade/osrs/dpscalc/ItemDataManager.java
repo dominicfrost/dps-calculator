@@ -6,13 +6,18 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
+
+import static net.runelite.api.ItemID.*;
 
 @Slf4j
 @Singleton
@@ -21,15 +26,17 @@ public class ItemDataManager
 
 	private static final Gson GSON = new Gson();
 
-	private final Map<Integer, ItemStats> ALL_STATS;
-	private final Map<String, ItemStats> ALL_STATS_BY_NAME;
+	private final Map<Integer, ItemStats> ITEMS_BY_ID;
+	private final Map<String, ItemStats> ITEMS_BY_NAME; // precompute since used in dropdowns
+
+	private final List<ItemStats> DARTS;
 
 	@Inject
 	public ItemDataManager()
 	{
 		try (InputStream fileStream = getClass().getResourceAsStream("items-dps-calc.min.json"); InputStreamReader reader = new InputStreamReader(fileStream))
 		{
-			ALL_STATS = GSON.fromJson(reader, new TypeToken<HashMap<Integer, ItemStats>>()
+			ITEMS_BY_ID = GSON.fromJson(reader, new TypeToken<HashMap<Integer, ItemStats>>()
 			{
 			}.getType());
 		}
@@ -39,26 +46,33 @@ public class ItemDataManager
 			throw new IllegalStateException(e);
 		}
 
-		ALL_STATS_BY_NAME = new HashMap<>(ALL_STATS.size());
-		for (Map.Entry<Integer, ItemStats> entry : ALL_STATS.entrySet())
+		ITEMS_BY_NAME = new HashMap<>(ITEMS_BY_ID.size());
+		for (Map.Entry<Integer, ItemStats> entry : ITEMS_BY_ID.entrySet())
 		{
 			ItemStats stats = entry.getValue();
 			stats.setItemId(entry.getKey());
 			if (stats.getName() != null && stats.getEquipStats() != null)
 			{
-				ALL_STATS_BY_NAME.put(entry.getValue().getName(), entry.getValue());
+				ITEMS_BY_NAME.put(entry.getValue().getName(), entry.getValue());
 			}
 		}
+		
+		// for tbp selection
+		DARTS = IntStream.of(DRAGON_DART, RUNE_DART, ADAMANT_DART, MITHRIL_DART, BLACK_DART, STEEL_DART, IRON_DART, BRONZE_DART)
+				.mapToObj(ITEMS_BY_ID::get)
+				.collect(Collectors.toList());
 	}
 	
-	public static final String[] DART_NAMES = {"Dragon Darts", "Rune Darts", "Adamant Darts", "Mithril Darts", "Black Darts", "Steel Darts", "Iron Darts", "Bronze Darts"};
-	public static final int[] DART_IDS = {11230, 811, 810, 809, 3093, 808, 807, 806};
-
+	public List<ItemStats> getAllDarts()
+	{
+		return Collections.unmodifiableList(DARTS);
+	}
+	
 	public String[] getAllItemNames(final int targetSlot)
 	{
 		return Stream.concat(
 				Stream.of(""),
-				ALL_STATS_BY_NAME.values()
+				ITEMS_BY_NAME.values()
 						.stream()
 						.filter(is -> is.getEquipStats().getSlot() == targetSlot)
 						.map(ItemStats::getName)
@@ -68,12 +82,12 @@ public class ItemDataManager
 
 	public ItemStats getItemStatsByName(String npcName)
 	{
-		return ALL_STATS_BY_NAME.get(npcName);
+		return ITEMS_BY_NAME.get(npcName);
 	}
 
 	public ItemStats getItemStatsById(int npcId)
 	{
-		return ALL_STATS.get(npcId);
+		return ITEMS_BY_ID.get(npcId);
 	}
 
 }

@@ -1,39 +1,30 @@
 package com.duckblade.osrs.dpscalc.calc;
 
-import com.duckblade.osrs.dpscalc.model.CalcInput;
-import com.duckblade.osrs.dpscalc.model.CombatMode;
-import com.duckblade.osrs.dpscalc.model.EquipmentFlags;
-
 public abstract class AbstractCalc
 {
+	private static final float SECONDS_PER_TICK = 0.6f;
+	
+	abstract int attackRoll(CalcInput input);
 
-	protected abstract float damagePerTick(CalcInput input);
+	abstract int defenseRoll(CalcInput input);
 
-	protected boolean useSlayerMask(CalcInput input)
+	abstract int maxHit(CalcInput input);
+	
+	float hitChance(CalcInput input)
 	{
-		if (!input.isOnSlayerTask())
-			return false;
-
-		if (input.getWeaponMode().getMode() == CombatMode.MELEE && input.getEquipmentFlags().contains(EquipmentFlags.SLAYER_MASK))
-			return true;
-
-		return input.getEquipmentFlags().contains(EquipmentFlags.SLAYER_MASK_I);
+		int attRoll = attackRoll(input);
+		int defRoll = defenseRoll(input);
+		
+		if (attRoll > defRoll)
+			return  1f - ((defRoll + 2f) / (2f * attRoll + 1f));
+		else
+			return attRoll / (2f * defRoll + 1f);
 	}
-
-	protected int salveLevel(CalcInput input)
+	
+	float calculateDPS(CalcInput input)
 	{
-		if (!input.getNpcTarget().isUndead())
-			return 0;
-
-		if (!input.getEquipmentFlags().contains(EquipmentFlags.SALVE))
-			return 0;
-
-		if (input.getWeaponMode().getMode() == CombatMode.MELEE)
-			return input.getEquipmentFlags().contains(EquipmentFlags.SALVE_E) ? 2 : 1;
-		else if (input.getEquipmentFlags().contains(EquipmentFlags.SALVE_I))
-			return 1;
-
-		return 0;
+		float weaponSpeed = input.getEquipmentStats().getSpeed();
+		return (maxHit(input) * hitChance(input)) / (2f * weaponSpeed * SECONDS_PER_TICK);
 	}
 	
 }

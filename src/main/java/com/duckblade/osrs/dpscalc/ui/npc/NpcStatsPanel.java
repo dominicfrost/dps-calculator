@@ -311,9 +311,10 @@ public class NpcStatsPanel extends JPanel
 
 	public String getSummary()
 	{
-		return manualEntry.isSelected() ? "Entered Manually" :
-				lastSet != null ? lastSet.getName() + " - Level " + lastSet.getCombatLevel() :
-						"Not Set";
+		if (!isReady())
+			return "Not Set";
+		
+		return manualEntry.isSelected() ? "Entered Manually" : lastSet.getName();
 	}
 
 }

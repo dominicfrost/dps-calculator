@@ -1,15 +1,27 @@
 package com.duckblade.osrs.dpscalc.calc;
 
-import com.duckblade.osrs.dpscalc.model.CalcInput;
 import com.duckblade.osrs.dpscalc.model.CombatFocus;
-import com.duckblade.osrs.dpscalc.model.EquipmentFlags;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
+
+import static com.duckblade.osrs.dpscalc.calc.CalcUtil.*;
 
 @Singleton
 // https://oldschool.runescape.wiki/w/Damage_per_second/Ranged
 public class RangedDpsCalc extends AbstractCalc
 {
+	
+	private float gearBonus(CalcInput input)
+	{
+		int salveLevel = salveLevel(input);
+		if (salveLevel == 2)
+			return 6f / 5f;
+		else if (salveLevel == 1)
+			return 7f / 6f;
+		else if (blackMask(input))
+			return 1.15f;
+		return 1f;
+	}
 	
 	private int effectiveRangedStrength(CalcInput input)
 	{
@@ -19,24 +31,24 @@ public class RangedDpsCalc extends AbstractCalc
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			rngStrength += 3;
 		rngStrength += 8;
-		
-		if (input.getEquipmentFlags().contains(EquipmentFlags.VOID_RANGED))
-		{
-			float voidMod = input.getEquipmentFlags().contains(EquipmentFlags.VOID_ELITE) ? 1.125f : 1.1f;
-			rngStrength = (int) (rngStrength * voidMod);
-		}
+
+		float voidLevel = voidLevel(input);
+		if (voidLevel == 2)
+			rngStrength = (int) (rngStrength * 1.125f);
+		else if (voidLevel == 1)
+			rngStrength = (int) (rngStrength * 1.125f);
+			
 		return rngStrength;
 	}
 	
-	private int maxHit(CalcInput input)
+	public int maxHit(CalcInput input)
 	{
 		int maxHit = effectiveRangedStrength(input);
 		maxHit *= (input.getEquipmentStats().getStrengthRanged() + 64);
 		maxHit += 320;
 		maxHit /= 640;
-		
-		if (salveLevel(input) > 0 || useSlayerMask(input))
-			maxHit = (int) (maxHit * (6f / 5f));
+
+		maxHit = (int) (maxHit * gearBonus(input));
 		return maxHit;
 	}
 	
@@ -52,45 +64,25 @@ public class RangedDpsCalc extends AbstractCalc
 			rngAttack += 3;
 		rngAttack += 8;
 
-		if (input.getEquipmentFlags().contains(EquipmentFlags.VOID_RANGED))
-		{
-			float voidMod = 1.1f;
-			rngAttack = (int) (rngAttack * voidMod);
-		}
+		if (voidLevel(input) != 0)
+			rngAttack = (int) (rngAttack * 1.1f);
+		
 		return rngAttack;
 	}
 	
-	private int attRoll(CalcInput input)
+	public int attackRoll(CalcInput input)
 	{
 		int attRoll = effectiveRangedAttack(input);
 		attRoll *= (input.getEquipmentStats().getAccuracyRanged() + 64);
-		if (salveLevel(input) > 0 || useSlayerMask(input))
-			attRoll = (int) (attRoll * (6f / 5f));
+		attRoll = (int) (attRoll * gearBonus(input));
 		return attRoll;
 	}
 	
-	private int defRoll(CalcInput input)
+	public int defenseRoll(CalcInput input)
 	{
 		int defRoll = input.getNpcTarget().getLevelDefense() + 9;
 		defRoll *= (input.getNpcTarget().getBonusDefenseRange() + 64);
 		return defRoll;
-	}
-
-	private float hitChance(CalcInput input)
-	{
-		int attRoll = attRoll(input);
-		int defRoll = defRoll(input);
-		if (attRoll > defRoll)
-			return 1f - ((defRoll + 2f) / (2f * attRoll + 1f));
-		else
-			return attRoll / (2f * defRoll + 1f);
-	}
-	
-	public float damagePerTick(CalcInput input)
-	{
-		float weaponSpeed = (float) input.getEquipmentStats().getSpeed();
-		float dmgPerHit = maxHit(input) * hitChance(input) / 2f;
-		return dmgPerHit / weaponSpeed;
 	}
 	
 }

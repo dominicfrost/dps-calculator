@@ -1,8 +1,7 @@
 package com.duckblade.osrs.dpscalc.ui;
 
+import com.duckblade.osrs.dpscalc.calc.CalcInput;
 import com.duckblade.osrs.dpscalc.calc.CalcManager;
-import com.duckblade.osrs.dpscalc.model.CalcInput;
-import com.duckblade.osrs.dpscalc.model.EquipmentFlags;
 import com.duckblade.osrs.dpscalc.model.EquipmentStats;
 import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.NpcStats;
@@ -18,7 +17,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.net.URI;
 import java.text.DecimalFormat;
-import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.Skill;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
@@ -168,23 +165,19 @@ public class DpsCalculatorPanel extends PluginPanel
 			return;
 		}
 
-		NpcStats npcStats = npcStatsPanel.toNpcStats();
 		WeaponMode weaponMode = equipmentPanel.getWeaponMode();
 		Map<EquipmentInventorySlot, ItemStats> equipment = equipmentPanel.getEquipment();
-		List<EquipmentFlags> equipmentFlags = EquipmentFlags.fromMap(equipment, rlItemManager);
-		EquipmentStats equipmentStats = EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts());
-		Map<Skill, Integer> playerSkills = skillsPanel.getSkills();
-		Map<Skill, Integer> playerBoosts = skillsPanel.getBoosts();
 
 		CalcInput input = CalcInput.builder()
-				.npcTarget(npcStats)
+				.npcTarget(npcStatsPanel.toNpcStats())
 				.weaponMode(weaponMode)
 				.playerEquipment(equipment)
-				.equipmentFlags(equipmentFlags)
-				.equipmentStats(equipmentStats)
-				.playerSkills(playerSkills)
-				.playerBoosts(playerBoosts)
+				.equipmentStats(EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts()))
+				.playerSkills(skillsPanel.getSkills())
+				.playerBoosts(skillsPanel.getBoosts())
+				.spell(equipmentPanel.getSpell())
 				.build();
+
 		float dps = calcManager.calculateDPS(input);
 		dpsValue.setText(DPS_FORMAT.format(dps));
 	}

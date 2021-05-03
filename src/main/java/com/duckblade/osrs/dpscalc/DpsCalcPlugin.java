@@ -27,19 +27,17 @@ public class DpsCalcPlugin extends Plugin
 
 	@Inject
 	private DpsCalcConfig config;
-	
-	private DpsCalculatorPanel panel;
-	
+
 	private NavigationButton navButton;
 
 	@Override
 	protected void startUp()
 	{
-		panel = injector.getInstance(DpsCalculatorPanel.class);
+		DpsCalculatorPanel panel = injector.getInstance(DpsCalculatorPanel.class);
 		
 		navButton = NavigationButton.builder()
 				.priority(5)
-				.icon(ImageUtil.loadImageResource(getClass(), "ui/slot_0.png"))
+				.icon(ImageUtil.loadImageResource(getClass(), "ui/equip/slot_0.png"))
 				.panel(panel)
 				.build();
 		toolbar.addNavigation(navButton);

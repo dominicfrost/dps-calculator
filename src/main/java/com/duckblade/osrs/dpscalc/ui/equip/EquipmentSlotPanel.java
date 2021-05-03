@@ -11,15 +11,14 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.ItemContainer;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
+// todo convert to CustomJComboBox
 public class EquipmentSlotPanel extends JPanel
 {
 
@@ -27,8 +26,7 @@ public class EquipmentSlotPanel extends JPanel
 
 	private final ItemManager rlItemManager;
 	private final ItemDataManager itemDataManager;
-	private final EquipmentInventorySlot slot;
-	private final EquipmentPanel parent;
+	private final Runnable callback;
 
 	private final ImageIcon defaultIcon;
 	private final JLabel imageLabel;
@@ -36,22 +34,23 @@ public class EquipmentSlotPanel extends JPanel
 
 	private ItemStats lastSet = null;
 
-	public EquipmentSlotPanel(ItemManager rlItemManager, ItemDataManager itemDataManager, EquipmentInventorySlot slot, EquipmentPanel parent)
+	public EquipmentSlotPanel(ItemManager rlItemManager, ItemDataManager itemDataManager, EquipmentInventorySlot slot, Runnable callback)
 	{
 		this.rlItemManager = rlItemManager;
 		this.itemDataManager = itemDataManager;
-		this.slot = slot;
-		this.parent = parent;
+		this.callback = callback;
 
 		setLayout(new BorderLayout());
 		setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 25));
 
 		defaultIcon = new ImageIcon(ImageUtil.resizeImage(ImageUtil.loadImageResource(getClass(), "slot_" + slot.getSlotIdx() + ".png"), 25, 25));
 		imageLabel = new JLabel(defaultIcon);
+		imageLabel.setMaximumSize(new Dimension(25, 25));
 		imageLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 3));
 		add(imageLabel, BorderLayout.WEST);
 
 		itemSelect = new JComboBox<>(itemDataManager.getAllItemNames(slot.getSlotIdx()));
+		itemSelect.setPrototypeDisplayValue("");
 		AutoCompletion.enable(itemSelect);
 		itemSelect.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 70, 25));
 		itemSelect.addActionListener(e -> setValue((String) itemSelect.getSelectedItem()));
@@ -62,15 +61,6 @@ public class EquipmentSlotPanel extends JPanel
 		SwingUtil.removeButtonDecorations(clearButton);
 		clearButton.addActionListener(e -> setValue(null, false));
 		add(clearButton, BorderLayout.EAST);
-	}
-
-	public void loadFromInventory(ItemContainer wornContainer)
-	{
-//		Item worn = wornContainer.getItem(slot.getSlotIdx());
-//		if (worn == null)
-//			setValue(null);
-//		else
-//			setValue(itemDataManager.getItemStatsById(worn.getId()).orElse(null));
 	}
 
 	public ItemStats getValue()
@@ -105,18 +95,13 @@ public class EquipmentSlotPanel extends JPanel
 			if (rlItemManager != null)
 			{
 				AsyncBufferedImage icon = rlItemManager.getImage(newValue.getItemId());
-				icon.addTo(imageLabel); // todo resize?
+				icon.addTo(imageLabel); // resize?
 			}
 			if (!fromItemSelect)
 				itemSelect.setSelectedItem(newValue.getName());
 		}
 
 		lastSet = newValue;
-		parent.onEquipmentChanged();
-		SwingUtilities.invokeLater(() ->
-		{
-			revalidate();
-			repaint();
-		});
+		callback.run();
 	}
 }

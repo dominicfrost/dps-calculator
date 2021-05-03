@@ -14,9 +14,6 @@ import net.runelite.client.util.ImageUtil;
 public class StatBox extends JPanel
 {
 
-	private static final int COMPONENT_WIDTH = 25;
-	private static final int COMPONENT_HEIGHT = 25;
-
 	private final JTextField valueField;
 
 	public StatBox(String iconName)

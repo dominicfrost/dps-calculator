@@ -1,7 +1,9 @@
 package com.duckblade.osrs.dpscalc.model;
 
+import lombok.Data;
 import lombok.Getter;
 
+@Data
 public class WeaponMode
 {
 	
@@ -16,13 +18,5 @@ public class WeaponMode
 	
 	@Getter
 	private final MeleeStyle meleeStyle;
-
-	public WeaponMode(String displayName, CombatMode mode, CombatFocus combatFocus, MeleeStyle meleeStyle)
-	{
-		this.displayName = displayName;
-		this.mode = mode;
-		this.combatFocus = combatFocus;
-		this.meleeStyle = meleeStyle;
-		assert mode != CombatMode.MELEE || meleeStyle != null;
-	}
+	
 }

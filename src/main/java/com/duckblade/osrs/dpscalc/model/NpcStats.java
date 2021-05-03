@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor // for npcstatspanel todo swap to builder
+@AllArgsConstructor // for npcstatspanel
 @NoArgsConstructor // for gson
 public class NpcStats
 {

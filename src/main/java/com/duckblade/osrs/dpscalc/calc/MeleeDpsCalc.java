@@ -1,10 +1,10 @@
 package com.duckblade.osrs.dpscalc.calc;
 
-import com.duckblade.osrs.dpscalc.model.CalcInput;
 import com.duckblade.osrs.dpscalc.model.CombatFocus;
-import com.duckblade.osrs.dpscalc.model.EquipmentFlags;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
+
+import static com.duckblade.osrs.dpscalc.calc.CalcUtil.*;
 
 @Singleton
 // https://oldschool.runescape.wiki/w/Damage_per_second/Melee
@@ -16,7 +16,7 @@ public class MeleeDpsCalc extends AbstractCalc
 		int salveLevel = salveLevel(input);
 		if (salveLevel == 2)
 			return 6f / 5f;
-		else if (salveLevel == 1 || useSlayerMask(input))
+		else if (salveLevel == 1 || blackMask(input))
 			return 7f / 6f;
 		else
 			return 1f;
@@ -34,7 +34,7 @@ public class MeleeDpsCalc extends AbstractCalc
 			str += 1;
 		str += 8;
 		
-		if (input.getEquipmentFlags().contains(EquipmentFlags.VOID_MELEE))
+		if (voidLevel(input) != 0)
 			str = (int) (str * 1.1f);
 		
 		return str;
@@ -52,13 +52,13 @@ public class MeleeDpsCalc extends AbstractCalc
 			att += 1;
 		att += 8;
 		
-		if (input.getEquipmentFlags().contains(EquipmentFlags.VOID_MELEE))
+		if (voidLevel(input) != 0)
 			att = (int) (att * 1.1f);
 		
 		return att;
 	}
 	
-	private int maxHit(CalcInput input)
+	public int maxHit(CalcInput input)
 	{
 		int maxHit = effectiveStrengthLevel(input) * (input.getEquipmentStats().getStrengthMelee() + 64);
 		maxHit += 320;
@@ -67,7 +67,7 @@ public class MeleeDpsCalc extends AbstractCalc
 		return (int) (maxHit * gearBonus(input));
 	}
 	
-	private int attackRoll(CalcInput input)
+	public int attackRoll(CalcInput input)
 	{
 		int attRoll = effectiveAttackLevel(input);
 		switch (input.getWeaponMode().getMeleeStyle())
@@ -88,7 +88,7 @@ public class MeleeDpsCalc extends AbstractCalc
 		return (int) (attRoll * gearBonus(input));
 	}
 	
-	private int defenseRoll(CalcInput input)
+	public int defenseRoll(CalcInput input)
 	{
 		int defLevel = input.getNpcTarget().getLevelDefense() + 9;
 		switch (input.getWeaponMode().getMeleeStyle())
@@ -102,23 +102,6 @@ public class MeleeDpsCalc extends AbstractCalc
 			default:
 				throw new IllegalArgumentException("Invalid melee attack style");
 		}
-	}
-	
-	private float hitChance(CalcInput input)
-	{
-		int attRoll = attackRoll(input);
-		int defRoll = defenseRoll(input);
-		if (attRoll > defRoll)
-			return 1f - ((defRoll + 2f) / (2f * attRoll + 1f));
-		else
-			return attRoll / (2f * defRoll + 1f);
-	}
-	
-	public float damagePerTick(CalcInput input)
-	{
-		float weaponSpeed = (float) input.getEquipmentStats().getSpeed();
-		float dmgPerHit = maxHit(input) * hitChance(input) / 2f;
-		return dmgPerHit / weaponSpeed;
 	}
 	
 }
