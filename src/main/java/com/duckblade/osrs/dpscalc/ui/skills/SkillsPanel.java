@@ -1,10 +1,9 @@
 package com.duckblade.osrs.dpscalc.ui.skills;
 
 import java.awt.Component;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.Box;
@@ -12,6 +11,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import net.runelite.api.Client;
+import net.runelite.api.Player;
 import net.runelite.api.Skill;
 
 import static net.runelite.api.Skill.*;
@@ -22,19 +22,8 @@ public class SkillsPanel extends JPanel
 
 	private final Client client;
 
-	private final StatBox attack;
-	private final StatBox strength;
-	private final StatBox defense;
-	private final StatBox magic;
-	private final StatBox ranged;
-	private final StatBox prayer;
-
-	private final StatBox boostAttack;
-	private final StatBox boostStrength;
-	private final StatBox boostDefense;
-	private final StatBox boostMagic;
-	private final StatBox boostRanged;
-	private final StatBox boostPrayer;
+	private final Map<Skill, StatBox> statBoxes;
+	private final Map<Skill, StatBox> boostBoxes;
 
 	@Inject
 	public SkillsPanel(Client client)
@@ -50,51 +39,46 @@ public class SkillsPanel extends JPanel
 
 		add(Box.createVerticalStrut(10));
 
-		attack = new StatBox("att", true);
-		strength = new StatBox("str", true);
-		defense = new StatBox("def", true);
-		magic = new StatBox("mage", true);
-		ranged = new StatBox("range", true);
-		prayer = new StatBox("prayer", true);
-
-		add(new StatCategory("Player Stats", Arrays.asList(
-				attack,
-				strength,
-				defense,
-				magic,
-				ranged,
-				prayer
-		)));
+		statBoxes = new HashMap<>(6);
+		statBoxes.put(ATTACK, new StatBox("att", true));
+		statBoxes.put(STRENGTH, new StatBox("str", true));
+		statBoxes.put(DEFENCE, new StatBox("def", true));
+		statBoxes.put(MAGIC, new StatBox("mage", true));
+		statBoxes.put(RANGED, new StatBox("range", true));
+		statBoxes.put(PRAYER, new StatBox("prayer", true));
+		add(new StatCategory("Player Stats", new ArrayList<>(statBoxes.values())));
 
 		add(Box.createVerticalStrut(10));
 
-		boostAttack = new StatBox("att", true);
-		boostStrength = new StatBox("str", true);
-		boostDefense = new StatBox("def", true);
-		boostMagic = new StatBox("mage", true);
-		boostRanged = new StatBox("range", true);
-		boostPrayer = new StatBox("prayer", true);
-
-		add(new StatCategory("Boosts", Arrays.asList(
-				boostAttack,
-				boostStrength,
-				boostDefense,
-				boostMagic,
-				boostRanged,
-				boostPrayer
-		)));
+		boostBoxes = new HashMap<>(6);
+		boostBoxes.put(ATTACK, new StatBox("att", true));
+		boostBoxes.put(STRENGTH, new StatBox("str", true));
+		boostBoxes.put(DEFENCE, new StatBox("def", true));
+		boostBoxes.put(MAGIC, new StatBox("mage", true));
+		boostBoxes.put(RANGED, new StatBox("range", true));
+		boostBoxes.put(PRAYER, new StatBox("prayer", true));
+		add(new StatCategory("Boosts", new ArrayList<>(boostBoxes.values())));
 	}
 
-	public void loadFromClient()
+	private void loadFromClient()
 	{
-		// TODO
+		if (client == null)
+			return; // ui test
+		
+		Player p = client.getLocalPlayer();
+		if (p == null)
+			return;
+
+		statBoxes.forEach((skill, box) -> box.setValue(client.getRealSkillLevel(skill)));
 	}
 
 	public boolean isReady()
 	{
-		return Stream.of(attack, strength, defense, magic, ranged, prayer).noneMatch(sb -> sb.getValue() == 0);
+		return statBoxes.values()
+				.stream()
+				.noneMatch(sb -> sb.getValue() == 0);
 	}
-	
+
 	public String getSummary()
 	{
 		if (isReady())
@@ -103,39 +87,18 @@ public class SkillsPanel extends JPanel
 		return "Not Set";
 	}
 
-	private static Map<Skill, Integer> buildMap(int a, int s, int d, int m, int r, int p)
-	{
-		HashMap<Skill, Integer> skills = new HashMap<>(6);
-		skills.put(ATTACK, a);
-		skills.put(STRENGTH, s);
-		skills.put(DEFENCE, d);
-		skills.put(MAGIC, m);
-		skills.put(RANGED, r);
-		skills.put(PRAYER, p);
-		return skills;
-	}
-
 	public Map<Skill, Integer> getSkills()
 	{
-		return buildMap(
-				attack.getValue(),
-				strength.getValue(),
-				defense.getValue(),
-				magic.getValue(),
-				ranged.getValue(),
-				prayer.getValue()
-		);
+		Map<Skill, Integer> results = new HashMap<>(6);
+		statBoxes.forEach((k, v) -> results.put(k, v.getValue()));
+		return results;
 	}
 
 	public Map<Skill, Integer> getBoosts()
 	{
-		return buildMap(
-				boostAttack.getValue(),
-				boostStrength.getValue(),
-				boostDefense.getValue(),
-				boostMagic.getValue(),
-				boostRanged.getValue(),
-				boostPrayer.getValue()
-		);
+
+		Map<Skill, Integer> results = new HashMap<>(6);
+		boostBoxes.forEach((k, v) -> results.put(k, v.getValue()));
+		return results;
 	}
 }

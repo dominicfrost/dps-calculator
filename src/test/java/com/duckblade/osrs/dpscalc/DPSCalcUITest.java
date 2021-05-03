@@ -32,7 +32,6 @@ public class DPSCalcUITest
 			ContainableFrame frame = new ContainableFrame();
 			frame.getLayeredPane().setCursor(Cursor.getDefaultCursor());
 			frame.add(new DpsCalculatorPanel(
-					null,
 					new CalcManager(new MageDpsCalc(), new MeleeDpsCalc(), new RangedDpsCalc()),
 					new NpcStatsPanel(new NpcDataManager()),
 					new EquipmentPanel(null, null, new ItemDataManager()),

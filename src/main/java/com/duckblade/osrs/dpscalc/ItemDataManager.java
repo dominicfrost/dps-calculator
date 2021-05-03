@@ -7,12 +7,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,6 @@ public class ItemDataManager
 	private static final Gson GSON = new Gson();
 
 	private final Map<Integer, ItemStats> ITEMS_BY_ID;
-	private final Map<String, ItemStats> ITEMS_BY_NAME; // precompute since used in dropdowns
 
 	private final List<ItemStats> DARTS;
 
@@ -39,6 +38,8 @@ public class ItemDataManager
 			ITEMS_BY_ID = GSON.fromJson(reader, new TypeToken<HashMap<Integer, ItemStats>>()
 			{
 			}.getType());
+			
+			ITEMS_BY_ID.forEach((id, stats) -> stats.setItemId(id));
 		}
 		catch (IOException e)
 		{
@@ -46,43 +47,26 @@ public class ItemDataManager
 			throw new IllegalStateException(e);
 		}
 
-		ITEMS_BY_NAME = new HashMap<>(ITEMS_BY_ID.size());
-		for (Map.Entry<Integer, ItemStats> entry : ITEMS_BY_ID.entrySet())
-		{
-			ItemStats stats = entry.getValue();
-			stats.setItemId(entry.getKey());
-			if (stats.getName() != null && stats.getEquipStats() != null)
-			{
-				ITEMS_BY_NAME.put(entry.getValue().getName(), entry.getValue());
-			}
-		}
-		
 		// for tbp selection
-		DARTS = IntStream.of(DRAGON_DART, RUNE_DART, ADAMANT_DART, MITHRIL_DART, BLACK_DART, STEEL_DART, IRON_DART, BRONZE_DART)
+		int[] DART_IDS = {DRAGON_DART, RUNE_DART, ADAMANT_DART, MITHRIL_DART, BLACK_DART, STEEL_DART, IRON_DART, BRONZE_DART};
+		DARTS = IntStream.of(DART_IDS)
 				.mapToObj(ITEMS_BY_ID::get)
 				.collect(Collectors.toList());
 	}
-	
+
 	public List<ItemStats> getAllDarts()
 	{
 		return Collections.unmodifiableList(DARTS);
 	}
-	
-	public String[] getAllItemNames(final int targetSlot)
-	{
-		return Stream.concat(
-				Stream.of(""),
-				ITEMS_BY_NAME.values()
-						.stream()
-						.filter(is -> is.getEquipStats().getSlot() == targetSlot)
-						.map(ItemStats::getName)
-						.sorted()
-		).toArray(i -> new String[i + 1]);
-	}
 
-	public ItemStats getItemStatsByName(String npcName)
+	public List<ItemStats> getBySlot(final int targetSlot)
 	{
-		return ITEMS_BY_NAME.get(npcName);
+		return ITEMS_BY_ID.values()
+				.stream()
+				.filter(is -> is.getSlot() == targetSlot)
+				.sorted(Comparator.comparing(ItemStats::getName))
+				.distinct()
+				.collect(Collectors.toList());
 	}
 
 	public ItemStats getItemStatsById(int npcId)

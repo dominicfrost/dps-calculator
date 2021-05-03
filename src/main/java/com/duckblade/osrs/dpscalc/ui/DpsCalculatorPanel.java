@@ -32,7 +32,6 @@ import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
@@ -41,7 +40,6 @@ import net.runelite.client.util.ImageUtil;
 @Singleton
 public class DpsCalculatorPanel extends PluginPanel
 {
-	private final ItemManager rlItemManager;
 	private final CalcManager calcManager;
 
 	private final JPanel contentPanel;
@@ -63,10 +61,9 @@ public class DpsCalculatorPanel extends PluginPanel
 	private static final String GITHUB_LINK = "https://github.com/LlemonDuck/dps-calculator";
 
 	@Inject
-	public DpsCalculatorPanel(ItemManager rlItemManager, CalcManager calcManager, NpcStatsPanel npcStatsPanel, EquipmentPanel equipmentPanel, SkillsPanel skillsPanel)
+	public DpsCalculatorPanel(CalcManager calcManager, NpcStatsPanel npcStatsPanel, EquipmentPanel equipmentPanel, SkillsPanel skillsPanel)
 	{
 		super(false);
-		this.rlItemManager = rlItemManager;
 		this.calcManager = calcManager;
 
 		this.npcStatsPanel = npcStatsPanel;
@@ -112,7 +109,7 @@ public class DpsCalculatorPanel extends PluginPanel
 		menuPanel.add(npcStatsNav);
 		menuPanel.add(Box.createVerticalStrut(5));
 
-		equipmentNav = new MenuPanelNavEntry("Equipment", "Not Set", () -> openEquipment(null));
+		equipmentNav = new MenuPanelNavEntry("Equipment", "Not Set", this::openEquipment);
 		menuPanel.add(equipmentNav);
 		menuPanel.add(Box.createVerticalStrut(5));
 
@@ -170,6 +167,7 @@ public class DpsCalculatorPanel extends PluginPanel
 
 		CalcInput input = CalcInput.builder()
 				.npcTarget(npcStatsPanel.toNpcStats())
+				.combatMode(weaponMode.getMode())
 				.weaponMode(weaponMode)
 				.playerEquipment(equipment)
 				.equipmentStats(EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts()))
@@ -184,14 +182,14 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	public void openMenu()
 	{
-		contentPanel.removeAll();
-		contentPanel.add(menuPanel);
-		npcStatsNav.setDescription(npcStatsPanel.getSummary());
-		equipmentNav.setDescription(equipmentPanel.getSummary());
-		skillsNav.setDescription(skillsPanel.getSummary());
-		calculateDps();
 		SwingUtilities.invokeLater(() ->
 		{
+			contentPanel.removeAll();
+			contentPanel.add(menuPanel);
+			npcStatsNav.setDescription(npcStatsPanel.getSummary());
+			equipmentNav.setDescription(equipmentPanel.getSummary());
+			skillsNav.setDescription(skillsPanel.getSummary());
+			calculateDps();
 			revalidate();
 			repaint();
 		});
@@ -199,25 +197,23 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	public void openNpcStats(NpcStats preload)
 	{
-		if (preload != null)
-			npcStatsPanel.loadNpcStats(preload);
-		contentPanel.removeAll();
-		contentPanel.add(npcStatsPanel);
 		SwingUtilities.invokeLater(() ->
 		{
+			if (preload != null)
+				npcStatsPanel.loadNpcStats(preload);
+			contentPanel.removeAll();
+			contentPanel.add(npcStatsPanel);
 			revalidate();
 			repaint();
 		});
 	}
 
-	public void openEquipment(Map<EquipmentInventorySlot, ItemStats> preload)
+	public void openEquipment()
 	{
-		if (preload != null)
-			equipmentPanel.preload(preload);
-		contentPanel.removeAll();
-		contentPanel.add(equipmentPanel);
 		SwingUtilities.invokeLater(() ->
 		{
+			contentPanel.removeAll();
+			contentPanel.add(equipmentPanel);
 			revalidate();
 			repaint();
 		});
@@ -225,10 +221,10 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	public void openSkills()
 	{
-		contentPanel.removeAll();
-		contentPanel.add(skillsPanel);
 		SwingUtilities.invokeLater(() ->
 		{
+			contentPanel.removeAll();
+			contentPanel.add(skillsPanel);
 			revalidate();
 			repaint();
 		});

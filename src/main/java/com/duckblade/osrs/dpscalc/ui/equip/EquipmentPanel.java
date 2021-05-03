@@ -26,6 +26,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
+import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -118,11 +121,6 @@ public class EquipmentPanel extends JPanel
 		rebuildTotals();
 	}
 
-	public void loadFromClient()
-	{
-		// TODO
-	}
-
 	public WeaponMode getWeaponMode()
 	{
 		return weaponModeSelect.getValue();
@@ -145,9 +143,29 @@ public class EquipmentPanel extends JPanel
 		return spellSelect.getValue();
 	}
 
-	public void preload(Map<EquipmentInventorySlot, ItemStats> items)
+	public void loadFromClient()
 	{
-		items.forEach((key, value) -> slotPanels.get(key).setValue(value));
+		if (client == null)
+			return; // ui test
+		
+		ItemContainer equipped = client.getItemContainer(InventoryID.EQUIPMENT);
+		if (equipped == null)
+			return;
+		
+		slotPanels.forEach((slot, panel) ->
+		{
+			Item rlItem = equipped.getItem(slot.getSlotIdx());
+			if (rlItem == null)
+			{
+				panel.setValue(null);
+				return;
+			}
+			
+			int canonicalId = rlItemManager.canonicalize(rlItem.getId());
+			ItemStats calcItem = itemDataManager.getItemStatsById(canonicalId);
+			panel.setValue(calcItem);
+		});
+		onEquipmentChanged();
 	}
 
 	public void onEquipmentChanged()

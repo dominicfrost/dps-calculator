@@ -13,7 +13,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.Box;
@@ -138,10 +137,6 @@ public class NpcStatsPanel extends JPanel
 		)));
 		add(Box.createVerticalStrut(5));
 
-		isUndead = new CustomJCheckBox("Undead");
-		isUndead.setEditable(false);
-		add(isUndead);
-
 		isDemon = new CustomJCheckBox("Demon");
 		isDemon.setEditable(false);
 		add(isDemon);
@@ -157,6 +152,10 @@ public class NpcStatsPanel extends JPanel
 		isLeafy = new CustomJCheckBox("Leafy");
 		isLeafy.setEditable(false);
 		add(isLeafy);
+
+		isUndead = new CustomJCheckBox("Undead");
+		isUndead.setEditable(false);
+		add(isUndead);
 
 		isVampyre = new CustomJCheckBox("Vampyre");
 		isVampyre.setEditable(false);
@@ -211,14 +210,23 @@ public class NpcStatsPanel extends JPanel
 				0,
 
 				// flags
-				isUndead.getValue(),
 				isDemon.getValue(),
 				isDragon.getValue(),
 				isKalphite.getValue(),
 				isLeafy.getValue(),
+				isUndead.getValue(),
 				isVampyre.getValue(),
 				isXerician.getValue()
 		);
+	}
+	
+	public void loadNpcById(int npcId)
+	{
+		NpcStats npc = npcDataManager.getNpcStatsById(npcId);
+		if (npc == null)
+			return;
+		
+		loadNpcStats(npc);
 	}
 
 	public void loadNpcStats(NpcStats stats)
@@ -240,6 +248,14 @@ public class NpcStatsPanel extends JPanel
 		bonusDefCrushBox.setValue(stats.getBonusDefenseCrush());
 		bonusDefMagicBox.setValue(stats.getBonusDefenseMagic());
 		bonusDefRangedBox.setValue(stats.getBonusDefenseRange());
+
+		isUndead.setValue(stats.isUndead());
+		isDemon.setValue(stats.isDemon());
+		isDragon.setValue(stats.isDragon());
+		isKalphite.setValue(stats.isKalphite());
+		isLeafy.setValue(stats.isLeafy());
+		isVampyre.setValue(stats.isVampyre());
+		isXerician.setValue(stats.isXerician());
 	}
 
 	private void updateSelected(boolean fromCombatSelector)
@@ -253,14 +269,13 @@ public class NpcStatsPanel extends JPanel
 				return;
 			}
 
-			Optional<Map<Integer, NpcStats>> statsMapOpt = npcDataManager.getNpcStatsByName((String) npcName);
-			if (!statsMapOpt.isPresent() || statsMapOpt.get().size() == 0)
+			Map<Integer, NpcStats> levelsMap = npcDataManager.getNpcStatsByName((String) npcName);
+			if (levelsMap == null || levelsMap.size() == 0)
 			{
 				combatLevelSelect.setVisible(false);
 				return;
 			}
 			combatLevelSelect.setVisible(true);
-			Map<Integer, NpcStats> levelsMap = statsMapOpt.get();
 
 			if (!fromCombatSelector)
 			{

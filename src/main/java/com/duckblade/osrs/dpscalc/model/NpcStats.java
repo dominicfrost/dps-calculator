@@ -40,11 +40,11 @@ public class NpcStats
 	@SerializedName("combat")
 	int combatLevel = 0;
 
-	boolean isUndead;
 	boolean isDemon;
 	boolean isDragon;
 	boolean isKalphite;
 	boolean isLeafy;
+	boolean isUndead;
 	boolean isVampyre;
 	boolean isXerician;
 

@@ -29,15 +29,15 @@ public class EquipmentStats
 		if (i == null)
 			return;
 
-		builder.accuracyStab += i.getEquipStats().getAccuracyStab();
-		builder.accuracySlash += i.getEquipStats().getAccuracySlash();
-		builder.accuracyCrush += i.getEquipStats().getAccuracyCrush();
-		builder.accuracyMagic += i.getEquipStats().getAccuracyMagic();
-		builder.accuracyRanged += i.getEquipStats().getAccuracyRanged();
-		builder.strengthMelee += i.getEquipStats().getStrengthMelee();
-		builder.strengthRanged += i.getEquipStats().getStrengthRanged();
-		builder.strengthMagic += i.getEquipStats().getStrengthMagic();
-		builder.prayer += i.getEquipStats().getPrayer();
+		builder.accuracyStab += i.getAccuracyStab();
+		builder.accuracySlash += i.getAccuracySlash();
+		builder.accuracyCrush += i.getAccuracyCrush();
+		builder.accuracyMagic += i.getAccuracyMagic();
+		builder.accuracyRanged += i.getAccuracyRanged();
+		builder.strengthMelee += i.getStrengthMelee();
+		builder.strengthRanged += i.getStrengthRanged();
+		builder.strengthMagic += i.getStrengthMagic();
+		builder.prayer += i.getPrayer();
 	}
 	
 	public static EquipmentStats fromMap(Map<EquipmentInventorySlot, ItemStats> slotMap, WeaponMode weaponMode, ItemStats tbpDarts)
@@ -46,7 +46,7 @@ public class EquipmentStats
 		EquipmentStatsBuilder b = EquipmentStats.builder();
 		slotMap.values().forEach(i -> addValues(b, i));
 		
-		b.speed = weapon == null ? 4 : weapon.getEquipStats().getSpeed();
+		b.speed = weapon == null ? 4 : weapon.getSpeed();
 		if (weaponMode != null && weaponMode.getCombatFocus() == CombatFocus.RAPID)
 			b.speed -= 1;
 		

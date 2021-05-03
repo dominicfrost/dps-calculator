@@ -60,14 +60,14 @@ public class NpcDataManager
 				.toArray(String[]::new);
 	}
 
-	public Optional<Map<Integer, NpcStats>> getNpcStatsByName(String npcName)
+	public Map<Integer, NpcStats> getNpcStatsByName(String npcName)
 	{
-		return Optional.ofNullable(ALL_STATS_BY_NAME.get(npcName));
+		return ALL_STATS_BY_NAME.get(npcName);
 	}
 
-	public Optional<NpcStats> getNpcStatsById(int npcId)
+	public NpcStats getNpcStatsById(int npcId)
 	{
-		return Optional.ofNullable(ALL_STATS.get(npcId));
+		return ALL_STATS.get(npcId);
 	}
 
 }
