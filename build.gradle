@@ -2,6 +2,11 @@ plugins {
 	id 'java'
 }
 
+compileJava {
+    options.compilerArgs << '-Xmaxerrs'
+    options.compilerArgs << '50000'
+}
+
 repositories {
 	mavenLocal()
 	maven {

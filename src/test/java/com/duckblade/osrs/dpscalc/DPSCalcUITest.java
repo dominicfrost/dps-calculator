@@ -4,9 +4,11 @@ import com.duckblade.osrs.dpscalc.calc.CalcManager;
 import com.duckblade.osrs.dpscalc.calc.MageDpsCalc;
 import com.duckblade.osrs.dpscalc.calc.MeleeDpsCalc;
 import com.duckblade.osrs.dpscalc.calc.RangedDpsCalc;
+import com.duckblade.osrs.dpscalc.model.Prayer;
 import com.duckblade.osrs.dpscalc.model.WeaponType;
 import com.duckblade.osrs.dpscalc.ui.DpsCalculatorPanel;
 import com.duckblade.osrs.dpscalc.ui.equip.EquipmentPanel;
+import com.duckblade.osrs.dpscalc.ui.prayer.PrayerPanel;
 import com.duckblade.osrs.dpscalc.ui.npc.NpcStatsPanel;
 import com.duckblade.osrs.dpscalc.ui.skills.SkillsPanel;
 import com.google.common.collect.ImmutableMap;
@@ -45,6 +47,7 @@ public class DPSCalcUITest
 			NpcStatsPanel nsp = new NpcStatsPanel(npcDataManager);
 			EquipmentPanel ep = new EquipmentPanel(null, null, itemDataManager);
 			SkillsPanel sp = new SkillsPanel(null);
+			PrayerPanel pp = new PrayerPanel(); // heh
 
 			// preloading (current is tbow max hit)
 			nsp.loadNpcStats(npcDataManager.getNpcStatsById(NpcID.ZULRAH_2044));
@@ -67,8 +70,9 @@ public class DPSCalcUITest
 					.build()
 			);
 			sp.setBoosts(ImmutableMap.of(Skill.RANGED, 13));
+			pp.setOffensive(Prayer.RIGOUR);
 
-			frame.add(new DpsCalculatorPanel(cm, nsp, ep, sp));
+			frame.add(new DpsCalculatorPanel(cm, nsp, ep, sp, pp));
 
 			frame.setSize(242, 800);
 			frame.setResizable(true);

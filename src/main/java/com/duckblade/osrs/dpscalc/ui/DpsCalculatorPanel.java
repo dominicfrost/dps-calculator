@@ -8,6 +8,7 @@ import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.NpcStats;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
 import com.duckblade.osrs.dpscalc.ui.equip.EquipmentPanel;
+import com.duckblade.osrs.dpscalc.ui.prayer.PrayerPanel;
 import com.duckblade.osrs.dpscalc.ui.npc.NpcStatsPanel;
 import com.duckblade.osrs.dpscalc.ui.skills.SkillsPanel;
 import java.awt.BorderLayout;
@@ -54,6 +55,9 @@ public class DpsCalculatorPanel extends PluginPanel
 	private final MenuPanelNavEntry skillsNav;
 	private final SkillsPanel skillsPanel;
 
+	private final MenuPanelNavEntry prayerNav;
+	private final PrayerPanel prayerPanel;
+
 	private final JLabel dpsValue;
 	private static final String DPS_CALC_FAIL = "???";
 	
@@ -70,7 +74,7 @@ public class DpsCalculatorPanel extends PluginPanel
 	private static final String GITHUB_LINK = "https://github.com/LlemonDuck/dps-calculator";
 
 	@Inject
-	public DpsCalculatorPanel(CalcManager calcManager, NpcStatsPanel npcStatsPanel, EquipmentPanel equipmentPanel, SkillsPanel skillsPanel)
+	public DpsCalculatorPanel(CalcManager calcManager, NpcStatsPanel npcStatsPanel, EquipmentPanel equipmentPanel, SkillsPanel skillsPanel, PrayerPanel prayerPanel)
 	{
 		super(false);
 		this.calcManager = calcManager;
@@ -78,6 +82,7 @@ public class DpsCalculatorPanel extends PluginPanel
 		this.npcStatsPanel = npcStatsPanel;
 		this.equipmentPanel = equipmentPanel;
 		this.skillsPanel = skillsPanel;
+		this.prayerPanel = prayerPanel;
 
 		setMinimumSize(new Dimension(PluginPanel.PANEL_WIDTH, 0));
 		setLayout(new BorderLayout());
@@ -124,7 +129,10 @@ public class DpsCalculatorPanel extends PluginPanel
 
 		skillsNav = new MenuPanelNavEntry("Skills", "Not Set", this::openSkills);
 		menuPanel.add(skillsNav);
-
+		menuPanel.add(Box.createVerticalStrut(5));
+		
+		prayerNav = new MenuPanelNavEntry("Extras", "Not Set", this::openPrayer);
+		menuPanel.add(prayerNav);
 		menuPanel.add(Box.createVerticalStrut(20));
 
 		Font originalBold = FontManager.getRunescapeBoldFont();
@@ -226,6 +234,8 @@ public class DpsCalculatorPanel extends PluginPanel
 				.playerBoosts(skillsPanel.getBoosts())
 				.spell(equipmentPanel.getSpell())
 				.onSlayerTask(equipmentPanel.isOnSlayerTask())
+				.offensivePrayer(prayerPanel.getOffensive())
+				.prayerDrain(prayerPanel.getDrain())
 				.build();
 
 		CalcResult result = calcManager.calculateDPS(input);
@@ -252,6 +262,7 @@ public class DpsCalculatorPanel extends PluginPanel
 			npcStatsNav.setDescription(npcStatsPanel.getSummary());
 			equipmentNav.setDescription(equipmentPanel.getSummary());
 			skillsNav.setDescription(skillsPanel.getSummary());
+			prayerNav.setDescription(prayerPanel.getSummary());
 			calculateDps();
 			revalidate();
 			repaint();
@@ -288,6 +299,17 @@ public class DpsCalculatorPanel extends PluginPanel
 		{
 			contentPanel.removeAll();
 			contentPanel.add(skillsPanel);
+			revalidate();
+			repaint();
+		});
+	}
+	
+	public void openPrayer()
+	{
+		SwingUtilities.invokeLater(() ->
+		{
+			contentPanel.removeAll();
+			contentPanel.add(prayerPanel);
 			revalidate();
 			repaint();
 		});

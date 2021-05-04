@@ -1,6 +1,7 @@
 package com.duckblade.osrs.dpscalc.calc;
 
 import com.duckblade.osrs.dpscalc.model.CombatFocus;
+import com.duckblade.osrs.dpscalc.model.Prayer;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
 
@@ -21,19 +22,22 @@ public class MeleeDpsCalc extends AbstractCalc
 		else
 			return 1f;
 	}
-	
+
 	private int effectiveStrengthLevel(CalcInput input)
 	{
 		int str = input.getPlayerSkills().get(Skill.STRENGTH);
 		str += input.getPlayerBoosts().get(Skill.STRENGTH);
-		str = (int) (str * 1.0f); // TODO prayers
+
+		Prayer offensivePrayer = input.getOffensivePrayer();
+		if (offensivePrayer != null)
+			str = (int) (str * offensivePrayer.getStrengthMod());
 		
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.AGGRESSIVE)
 			str += 3;
 		else if (input.getWeaponMode().getCombatFocus() == CombatFocus.CONTROLLED)
 			str += 1;
 		str += 8;
-		
+
 		if (voidLevel(input) != 0)
 			str = (int) (str * 1.1f);
 
@@ -49,47 +53,50 @@ public class MeleeDpsCalc extends AbstractCalc
 			str = (int) (str * 1.2f); // obisidian bonuses stack
 
 		str = (int) (str * inquisitorsMod(input));
-		
+
 		return str;
 	}
-	
+
 	private int effectiveAttackLevel(CalcInput input)
 	{
 		int att = input.getPlayerSkills().get(Skill.ATTACK);
 		att += input.getPlayerBoosts().get(Skill.ATTACK);
-		att = (int) (att * 1.0f); // TODO prayers
-		
+
+		Prayer offensivePrayer = input.getOffensivePrayer();
+		if (offensivePrayer != null)
+			att = (int) (att * offensivePrayer.getAttackMod());
+
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			att += 3;
 		else if (input.getWeaponMode().getCombatFocus() == CombatFocus.CONTROLLED)
 			att += 1;
 		att += 8;
-		
+
 		if (voidLevel(input) != 0)
 			att = (int) (att * 1.1f);
-		
+
 		if (dragonHunter(input))
 			att = (int) (att * 1.2f);
-		
+
 		att = (int) (att * leafyMod(input));
-		
+
 		if (obsidianArmour(input))
 			att = (int) (att * 1.1f); // no necklace, accuracy penalty is done in item stats
-		
+
 		att = (int) (att * inquisitorsMod(input));
-		
+
 		return att;
 	}
-	
+
 	public int maxHit(CalcInput input)
 	{
 		int maxHit = effectiveStrengthLevel(input) * (input.getEquipmentStats().getStrengthMelee() + 64);
 		maxHit += 320;
 		maxHit /= 640;
-		
+
 		return (int) (maxHit * gearBonus(input));
 	}
-	
+
 	public int attackRoll(CalcInput input)
 	{
 		int attRoll = effectiveAttackLevel(input);
@@ -107,10 +114,10 @@ public class MeleeDpsCalc extends AbstractCalc
 			default:
 				throw new IllegalArgumentException("Invalid melee attack style");
 		}
-		
+
 		return (int) (attRoll * gearBonus(input));
 	}
-	
+
 	public int defenseRoll(CalcInput input)
 	{
 		int defLevel = input.getNpcTarget().getLevelDefense() + 9;
@@ -126,5 +133,5 @@ public class MeleeDpsCalc extends AbstractCalc
 				throw new IllegalArgumentException("Invalid melee attack style");
 		}
 	}
-	
+
 }

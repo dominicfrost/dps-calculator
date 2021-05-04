@@ -4,6 +4,7 @@ import com.duckblade.osrs.dpscalc.model.CombatMode;
 import com.duckblade.osrs.dpscalc.model.EquipmentStats;
 import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.NpcStats;
+import com.duckblade.osrs.dpscalc.model.Prayer;
 import com.duckblade.osrs.dpscalc.model.Spell;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
 import java.util.Map;
@@ -16,7 +17,6 @@ import net.runelite.api.Skill;
 @Builder
 public class CalcInput
 {
-	
 	
 	private final CombatMode combatMode;
 
@@ -33,6 +33,10 @@ public class CalcInput
 	private final Map<EquipmentInventorySlot, ItemStats> playerEquipment;
 	
 	private final Spell spell;
+	
+	private final Prayer offensivePrayer;
+
+	private final int prayerDrain;
 
 	@Builder.Default
 	private final boolean onSlayerTask = false; // slayer helms

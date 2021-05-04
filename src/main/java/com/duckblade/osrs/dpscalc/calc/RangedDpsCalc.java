@@ -1,6 +1,7 @@
 package com.duckblade.osrs.dpscalc.calc;
 
 import com.duckblade.osrs.dpscalc.model.CombatFocus;
+import com.duckblade.osrs.dpscalc.model.Prayer;
 import javax.inject.Singleton;
 import net.runelite.api.Skill;
 
@@ -10,7 +11,7 @@ import static com.duckblade.osrs.dpscalc.calc.CalcUtil.*;
 // https://oldschool.runescape.wiki/w/Damage_per_second/Ranged
 public class RangedDpsCalc extends AbstractCalc
 {
-	
+
 	private float gearBonus(CalcInput input)
 	{
 		int salveLevel = salveLevel(input);
@@ -22,12 +23,15 @@ public class RangedDpsCalc extends AbstractCalc
 			return 1.15f;
 		return 1f;
 	}
-	
+
 	private int effectiveRangedStrength(CalcInput input)
 	{
 		int rngStrength = input.getPlayerSkills().get(Skill.RANGED) + input.getPlayerBoosts().get(Skill.RANGED);
-		rngStrength = (int) (rngStrength * 1.23f); // todo prayer boost
-		
+
+		Prayer offensivePrayer = input.getOffensivePrayer();
+		if (offensivePrayer != null)
+			rngStrength = (int) (rngStrength * offensivePrayer.getStrengthMod());
+
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			rngStrength += 3;
 		rngStrength += 8;
@@ -37,7 +41,7 @@ public class RangedDpsCalc extends AbstractCalc
 			rngStrength = (int) (rngStrength * 1.125f);
 		else if (voidLevel == 1)
 			rngStrength = (int) (rngStrength * 1.125f);
-		
+
 		if (dragonHunter(input))
 			rngStrength = (int) (rngStrength * 1.3f);
 
@@ -45,10 +49,10 @@ public class RangedDpsCalc extends AbstractCalc
 		// unlike tbow accuracy, this one could make a difference
 		if (EquipmentRequirement.TBOW.isSatisfied(input))
 			rngStrength = (int) (rngStrength * tbowDmgModifier(input));
-			
+
 		return rngStrength;
 	}
-	
+
 	public int maxHit(CalcInput input)
 	{
 		int maxHit = effectiveRangedStrength(input);
@@ -59,17 +63,20 @@ public class RangedDpsCalc extends AbstractCalc
 		maxHit = (int) (maxHit * gearBonus(input));
 
 		maxHit = (int) (maxHit * leafyMod(input));
-		
+
 		return maxHit;
 	}
-	
+
 	private int effectiveRangedAttack(CalcInput input)
 	{
 		// note that this method is the same as effectiveRangedStrength,
 		// other than the voidMod
 		// prayer boost for rigour will also be different when implemented
 		int rngAttack = input.getPlayerSkills().get(Skill.RANGED) + input.getPlayerBoosts().get(Skill.RANGED);
-		rngAttack = (int) (rngAttack * 1.2f); // todo prayer boost
+
+		Prayer offensivePrayer = input.getOffensivePrayer();
+		if (offensivePrayer != null)
+			rngAttack = (int) (rngAttack * offensivePrayer.getAttackMod());
 
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			rngAttack += 3;
@@ -82,10 +89,10 @@ public class RangedDpsCalc extends AbstractCalc
 			rngAttack = (int) (rngAttack * 1.3f);
 
 		rngAttack = (int) (rngAttack * leafyMod(input));
-		
+
 		return rngAttack;
 	}
-	
+
 	public int attackRoll(CalcInput input)
 	{
 		int attRoll = effectiveRangedAttack(input);
@@ -96,15 +103,15 @@ public class RangedDpsCalc extends AbstractCalc
 		// or even whether it matters (i suspect it doesn't besides minor rounding differences)
 		if (EquipmentRequirement.TBOW.isSatisfied(input))
 			attRoll = (int) (attRoll * tbowAttModifier(input));
-		
+
 		return attRoll;
 	}
-	
+
 	public int defenseRoll(CalcInput input)
 	{
 		int defRoll = input.getNpcTarget().getLevelDefense() + 9;
 		defRoll *= (input.getNpcTarget().getBonusDefenseRange() + 64);
 		return defRoll;
 	}
-	
+
 }
