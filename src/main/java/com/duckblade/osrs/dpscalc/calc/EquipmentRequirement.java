@@ -25,6 +25,18 @@ public enum EquipmentRequirement
 	AHRIMS(new EquipmentInventorySlot[] {HEAD, BODY, LEGS}, new int[][] {{AHRIMS_HOOD}, {AHRIMS_ROBETOP}, {AHRIMS_ROBESKIRT}}),
 	MAGE_CHAOS_GAUNTLETS(new EquipmentInventorySlot[] {GLOVES}, new int[][] {{CHAOS_GAUNTLETS}}),
 	FIRE_TOME(new EquipmentInventorySlot[] {SHIELD}, new int[][] {{TOME_OF_FIRE}}),
+	DRAGON_HUNTER(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{DRAGON_HUNTER_LANCE, DRAGON_HUNTER_CROSSBOW}}),
+	TBOW(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{TWISTED_BOW}}),
+	LEAF_BLADED_MELEE(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{LEAFBLADED_BATTLEAXE, LEAFBLADED_SPEAR, LEAFBLADED_SWORD}}),
+	LEAF_BLADED_BAXE(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{LEAFBLADED_BATTLEAXE}}),
+	LEAF_BLADED_RANGED(new EquipmentInventorySlot[] {AMMO}, new int[][] {{BROAD_BOLTS, BROAD_ARROWS}}),
+	OBSIDIAN_WEAPON(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{TOKTZXILEK, TOKTZXILAK, TOKTZXILAK_20554, TZHAARKETEM, TZHAARKETOM, TZHAARKETOM_T}}),
+	OBSIDIAN_ARMOUR(new EquipmentInventorySlot[] {HEAD, BODY, LEGS}, new int[][] {{OBSIDIAN_HELMET}, {OBSIDIAN_PLATEBODY}, {OBSIDIAN_PLATELEGS}}),
+	OBSIDIAN_NECKLACE(new EquipmentInventorySlot[] {AMULET}, new int[][] {{BERSERKER_NECKLACE, BERSERKER_NECKLACE_OR}}),
+	INQUISITOR_HELM(new EquipmentInventorySlot[] {HEAD}, new int[][] {{INQUISITORS_GREAT_HELM}}),
+	INQUISITOR_BODY(new EquipmentInventorySlot[] {BODY}, new int[][] {{INQUISITORS_HAUBERK}}),
+	INQUISITOR_LEGS(new EquipmentInventorySlot[] {LEGS}, new int[][] {{INQUISITORS_PLATESKIRT}}),
+	INQUISITOR_FULL(new EquipmentInventorySlot[] {HEAD, BODY, LEGS}, new int[][] {{INQUISITORS_GREAT_HELM}, {INQUISITORS_HAUBERK}, {INQUISITORS_PLATESKIRT}}),
 	;
 
 	private final EquipmentInventorySlot[] slots;

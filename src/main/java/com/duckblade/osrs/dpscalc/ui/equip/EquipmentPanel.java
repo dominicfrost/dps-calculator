@@ -8,6 +8,7 @@ import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.Spell;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
 import com.duckblade.osrs.dpscalc.model.WeaponType;
+import com.duckblade.osrs.dpscalc.ui.util.CustomJCheckBox;
 import com.duckblade.osrs.dpscalc.ui.util.CustomJComboBox;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -43,6 +44,7 @@ public class EquipmentPanel extends JPanel
 	private final ItemDataManager itemDataManager;
 
 	private final Map<EquipmentInventorySlot, EquipmentSlotPanel> slotPanels;
+	private final CustomJCheckBox slayerCheck;
 	private final EquipmentSlotPanel weaponSlot;
 
 	private final CustomJComboBox<ItemStats> tbpDartSelectPanel;
@@ -75,12 +77,21 @@ public class EquipmentPanel extends JPanel
 		slotPanel.setAlignmentX(CENTER_ALIGNMENT);
 		add(slotPanel);
 
+		slayerCheck = new CustomJCheckBox("On Slayer Task");
+		slayerCheck.setBorder(BorderFactory.createEmptyBorder(0, 0, 5, 0));
+		slayerCheck.setValue(false);
+		slayerCheck.setEditable(true);
+		slayerCheck.setVisible(false);
+
 		for (EquipmentInventorySlot slot : EquipmentInventorySlot.values())
 		{
 			EquipmentSlotPanel innerPanel = new EquipmentSlotPanel(this.rlItemManager, this.itemDataManager, slot, this::onEquipmentChanged);
 			this.slotPanels.put(slot, innerPanel);
 			slotPanel.add(innerPanel);
-			slotPanel.add(Box.createRigidArea(new Dimension(1, 5)));
+			slotPanel.add(Box.createVerticalStrut(5));
+			
+			if (slot == EquipmentInventorySlot.HEAD)
+				slotPanel.add(slayerCheck);
 		}
 		weaponSlot = slotPanels.get(EquipmentInventorySlot.WEAPON);
 
@@ -125,12 +136,41 @@ public class EquipmentPanel extends JPanel
 	{
 		return weaponModeSelect.getValue();
 	}
+	
+	public void setWeaponMode(WeaponMode newValue)
+	{
+		weaponModeSelect.setValue(newValue);
+		onEquipmentChanged();
+	}
 
 	public Map<EquipmentInventorySlot, ItemStats> getEquipment()
 	{
 		HashMap<EquipmentInventorySlot, ItemStats> resultMap = new HashMap<>();
 		slotPanels.forEach((key, value) -> resultMap.put(key, value.getValue()));
 		return resultMap;
+	}
+	
+	public void setEquipment(Map<EquipmentInventorySlot, ItemStats> newEquipment)
+	{
+		newEquipment.forEach((slot, item) -> slotPanels.get(slot).setValue(item));
+		
+		// don't defer this step to onEquipmentChanged, since it uses invokeLater, and a caller may set this value after setting a weapon
+		ItemStats newWeapon = newEquipment.get(EquipmentInventorySlot.WEAPON);
+		List<WeaponMode> modes = newWeapon == null ? WeaponType.UNARMED.getWeaponModes() : newWeapon.getWeaponType().getWeaponModes();
+		weaponModeSelect.setItems(modes);
+		
+		onEquipmentChanged();
+	}
+	
+	public boolean isOnSlayerTask()
+	{
+		return slayerCheck.getValue();
+	}
+	
+	public void setOnSlayerTask(boolean newValue)
+	{
+		slayerCheck.setValue(newValue);
+		onEquipmentChanged();
 	}
 
 	public ItemStats getTbpDarts()
@@ -172,6 +212,9 @@ public class EquipmentPanel extends JPanel
 	{
 		SwingUtilities.invokeLater(() ->
 		{
+			Map<EquipmentInventorySlot, ItemStats> equipment = getEquipment();
+			slayerCheck.setVisible(EquipmentRequirement.BLACK_MASK_MELEE.isSatisfied(equipment));
+			
 			ItemStats currentWeapon = weaponSlot.getValue();
 
 			boolean dartSelectVisible = currentWeapon != null && currentWeapon.getItemId() == ItemID.TOXIC_BLOWPIPE;
@@ -184,7 +227,6 @@ public class EquipmentPanel extends JPanel
 			if (weaponMode != null && weaponMode.getMode() == CombatMode.MAGE)
 			{
 				assert currentWeapon != null;
-				Map<EquipmentInventorySlot, ItemStats> equipment = getEquipment();
 				boolean ahrimsDamned = EquipmentRequirement.AHRIMS.isSatisfied(equipment) && EquipmentRequirement.AMULET_DAMNED.isSatisfied(equipment);
 				List<Spell> availableSpells = Spell.forWeapon(currentWeapon.getItemId(), ahrimsDamned);
 				spellSelect.setItems(availableSpells);

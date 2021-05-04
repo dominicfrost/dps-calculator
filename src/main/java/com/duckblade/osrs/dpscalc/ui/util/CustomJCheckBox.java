@@ -1,6 +1,8 @@
 package com.duckblade.osrs.dpscalc.ui.util;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -24,6 +26,17 @@ public class CustomJCheckBox extends JPanel
 		label = new JLabel(text);
 		label.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		add(label, BorderLayout.CENTER);
+		
+		final MouseAdapter clickListener = new MouseAdapter()
+		{
+			@Override
+			public void mouseClicked(MouseEvent e)
+			{
+				setValue(!getValue());
+			}
+		};
+		label.addMouseListener(clickListener);
+		addMouseListener(clickListener);
 	}
 	
 	public boolean getValue()

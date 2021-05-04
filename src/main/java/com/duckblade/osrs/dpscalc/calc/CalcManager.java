@@ -25,7 +25,7 @@ public class CalcManager
 		}
 	}
 
-	public float calculateDPS(CalcInput input)
+	public CalcResult calculateDPS(CalcInput input)
 	{
 		return getCalc(input.getCombatMode())
 				.calculateDPS(input);

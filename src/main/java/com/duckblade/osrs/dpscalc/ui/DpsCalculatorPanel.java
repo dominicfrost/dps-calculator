@@ -2,6 +2,7 @@ package com.duckblade.osrs.dpscalc.ui;
 
 import com.duckblade.osrs.dpscalc.calc.CalcInput;
 import com.duckblade.osrs.dpscalc.calc.CalcManager;
+import com.duckblade.osrs.dpscalc.calc.CalcResult;
 import com.duckblade.osrs.dpscalc.model.EquipmentStats;
 import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.NpcStats;
@@ -11,7 +12,6 @@ import com.duckblade.osrs.dpscalc.ui.npc.NpcStatsPanel;
 import com.duckblade.osrs.dpscalc.ui.skills.SkillsPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Font;
@@ -56,7 +56,16 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	private final JLabel dpsValue;
 	private static final String DPS_CALC_FAIL = "???";
+	
+	private final JLabel attackRollLabel;
+	private final JLabel defenseRollLabel;
+	private final JLabel hitChanceLabel;
+	private final JLabel maxHitLabel;
+	private final JLabel hitRateLabel;
+	
 	private static final DecimalFormat DPS_FORMAT = new DecimalFormat("#.###");
+	private static final DecimalFormat HIT_CHANCE_FORMAT = new DecimalFormat("#.#%");
+	private static final DecimalFormat HIT_RATE_FORMAT = new DecimalFormat("#.#");
 
 	private static final String GITHUB_LINK = "https://github.com/LlemonDuck/dps-calculator";
 
@@ -95,7 +104,7 @@ public class DpsCalculatorPanel extends PluginPanel
 		headerPanel.add(homeButton, BorderLayout.WEST);
 
 		JLabel titleLabel = new JLabel("DPS Calc", JLabel.CENTER);
-		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
+		titleLabel.setAlignmentX(CENTER_ALIGNMENT);
 		titleLabel.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
 		headerPanel.add(titleLabel, BorderLayout.CENTER);
 
@@ -121,16 +130,53 @@ public class DpsCalculatorPanel extends PluginPanel
 		Font originalBold = FontManager.getRunescapeBoldFont();
 		Font dpsFont = originalBold.deriveFont(originalBold.getSize() * 2f);
 		JLabel dpsHeader = new JLabel("DPS:", JLabel.CENTER);
-		dpsHeader.setAlignmentX(Component.CENTER_ALIGNMENT);
+		dpsHeader.setAlignmentX(CENTER_ALIGNMENT);
 		dpsHeader.setForeground(Color.white);
 		dpsHeader.setFont(dpsFont);
 		menuPanel.add(dpsHeader);
 
 		dpsValue = new JLabel(DPS_CALC_FAIL, JLabel.CENTER);
-		dpsValue.setAlignmentX(Component.CENTER_ALIGNMENT);
+		dpsValue.setAlignmentX(CENTER_ALIGNMENT);
 		dpsValue.setForeground(Color.white);
 		dpsValue.setFont(dpsFont);
 		menuPanel.add(dpsValue);
+		
+		menuPanel.add(Box.createVerticalStrut(5));
+
+		attackRollLabel = new JLabel();
+		attackRollLabel.setFont(FontManager.getRunescapeBoldFont());
+		attackRollLabel.setForeground(Color.white);
+		attackRollLabel.setAlignmentX(CENTER_ALIGNMENT);
+		attackRollLabel.setVisible(false);
+		menuPanel.add(attackRollLabel);
+		
+		defenseRollLabel = new JLabel();
+		defenseRollLabel.setFont(FontManager.getRunescapeBoldFont());
+		defenseRollLabel.setForeground(Color.white);
+		defenseRollLabel.setAlignmentX(CENTER_ALIGNMENT);
+		defenseRollLabel.setVisible(false);
+		menuPanel.add(defenseRollLabel);
+		
+		hitChanceLabel = new JLabel();
+		hitChanceLabel.setFont(FontManager.getRunescapeBoldFont());
+		hitChanceLabel.setForeground(Color.white);
+		hitChanceLabel.setAlignmentX(CENTER_ALIGNMENT);
+		hitChanceLabel.setVisible(false);
+		menuPanel.add(hitChanceLabel);
+		
+		maxHitLabel = new JLabel();
+		maxHitLabel.setFont(FontManager.getRunescapeBoldFont());
+		maxHitLabel.setForeground(Color.white);
+		maxHitLabel.setAlignmentX(CENTER_ALIGNMENT);
+		maxHitLabel.setVisible(false);
+		menuPanel.add(maxHitLabel);
+		
+		hitRateLabel = new JLabel();
+		hitRateLabel.setFont(FontManager.getRunescapeBoldFont());
+		hitRateLabel.setForeground(Color.white);
+		hitRateLabel.setAlignmentX(CENTER_ALIGNMENT);
+		hitRateLabel.setVisible(false);
+		menuPanel.add(hitRateLabel);
 	}
 
 	private void openGhLink()
@@ -159,6 +205,11 @@ public class DpsCalculatorPanel extends PluginPanel
 		if (!npcStatsPanel.isReady() || !equipmentPanel.isReady() || !skillsPanel.isReady())
 		{
 			dpsValue.setText(DPS_CALC_FAIL);
+			attackRollLabel.setVisible(false);
+			defenseRollLabel.setVisible(false);
+			hitChanceLabel.setVisible(false);
+			maxHitLabel.setVisible(false);
+			hitRateLabel.setVisible(false);
 			return;
 		}
 
@@ -174,10 +225,22 @@ public class DpsCalculatorPanel extends PluginPanel
 				.playerSkills(skillsPanel.getSkills())
 				.playerBoosts(skillsPanel.getBoosts())
 				.spell(equipmentPanel.getSpell())
+				.onSlayerTask(equipmentPanel.isOnSlayerTask())
 				.build();
 
-		float dps = calcManager.calculateDPS(input);
-		dpsValue.setText(DPS_FORMAT.format(dps));
+		CalcResult result = calcManager.calculateDPS(input);
+		dpsValue.setText(DPS_FORMAT.format(result.getDps()));
+
+		attackRollLabel.setVisible(true);
+		attackRollLabel.setText("Attack roll: " + result.getAttackRoll());
+		defenseRollLabel.setVisible(true);
+		defenseRollLabel.setText("Defense roll: " + result.getDefenseRoll());
+		hitChanceLabel.setVisible(true);
+		hitChanceLabel.setText("Hit chance: " + HIT_CHANCE_FORMAT.format(result.getHitChance()));
+		maxHitLabel.setVisible(true);
+		maxHitLabel.setText("Max hit: " + result.getMaxHit());
+		hitRateLabel.setVisible(true);
+		hitRateLabel.setText("Hit speed: " + HIT_RATE_FORMAT.format(result.getHitRate()) + " seconds");
 	}
 
 	public void openMenu()

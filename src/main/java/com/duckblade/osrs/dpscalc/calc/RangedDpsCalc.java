@@ -26,7 +26,7 @@ public class RangedDpsCalc extends AbstractCalc
 	private int effectiveRangedStrength(CalcInput input)
 	{
 		int rngStrength = input.getPlayerSkills().get(Skill.RANGED) + input.getPlayerBoosts().get(Skill.RANGED);
-		rngStrength = (int) (rngStrength * 1.0f); // todo prayer boost
+		rngStrength = (int) (rngStrength * 1.23f); // todo prayer boost
 		
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			rngStrength += 3;
@@ -37,6 +37,14 @@ public class RangedDpsCalc extends AbstractCalc
 			rngStrength = (int) (rngStrength * 1.125f);
 		else if (voidLevel == 1)
 			rngStrength = (int) (rngStrength * 1.125f);
+		
+		if (dragonHunter(input))
+			rngStrength = (int) (rngStrength * 1.3f);
+
+		// unsure whether this should be here or in effectiveRangedStrength
+		// unlike tbow accuracy, this one could make a difference
+		if (EquipmentRequirement.TBOW.isSatisfied(input))
+			rngStrength = (int) (rngStrength * tbowDmgModifier(input));
 			
 		return rngStrength;
 	}
@@ -49,6 +57,9 @@ public class RangedDpsCalc extends AbstractCalc
 		maxHit /= 640;
 
 		maxHit = (int) (maxHit * gearBonus(input));
+
+		maxHit = (int) (maxHit * leafyMod(input));
+		
 		return maxHit;
 	}
 	
@@ -58,7 +69,7 @@ public class RangedDpsCalc extends AbstractCalc
 		// other than the voidMod
 		// prayer boost for rigour will also be different when implemented
 		int rngAttack = input.getPlayerSkills().get(Skill.RANGED) + input.getPlayerBoosts().get(Skill.RANGED);
-		rngAttack = (int) (rngAttack * 1.0f); // todo prayer boost
+		rngAttack = (int) (rngAttack * 1.2f); // todo prayer boost
 
 		if (input.getWeaponMode().getCombatFocus() == CombatFocus.ACCURATE)
 			rngAttack += 3;
@@ -66,6 +77,11 @@ public class RangedDpsCalc extends AbstractCalc
 
 		if (voidLevel(input) != 0)
 			rngAttack = (int) (rngAttack * 1.1f);
+
+		if (dragonHunter(input))
+			rngAttack = (int) (rngAttack * 1.3f);
+
+		rngAttack = (int) (rngAttack * leafyMod(input));
 		
 		return rngAttack;
 	}
@@ -75,6 +91,12 @@ public class RangedDpsCalc extends AbstractCalc
 		int attRoll = effectiveRangedAttack(input);
 		attRoll *= (input.getEquipmentStats().getAccuracyRanged() + 64);
 		attRoll = (int) (attRoll * gearBonus(input));
+
+		// unsure whether this should be here or in effectiveRangedAttack
+		// or even whether it matters (i suspect it doesn't besides minor rounding differences)
+		if (EquipmentRequirement.TBOW.isSatisfied(input))
+			attRoll = (int) (attRoll * tbowAttModifier(input));
+		
 		return attRoll;
 	}
 	

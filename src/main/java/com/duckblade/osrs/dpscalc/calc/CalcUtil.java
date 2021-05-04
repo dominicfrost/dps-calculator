@@ -1,6 +1,8 @@
 package com.duckblade.osrs.dpscalc.calc;
 
 import com.duckblade.osrs.dpscalc.model.CombatMode;
+import com.duckblade.osrs.dpscalc.model.MeleeStyle;
+import com.duckblade.osrs.dpscalc.model.Spell;
 import lombok.experimental.UtilityClass;
 
 import static com.duckblade.osrs.dpscalc.calc.EquipmentRequirement.*;
@@ -49,6 +51,80 @@ public class CalcUtil
 			return 0;
 		
 		return VOID_ELITE.isSatisfied(input) ? 2 : 1;
+	}
+	
+	public boolean dragonHunter(CalcInput input)
+	{
+		if (!input.getNpcTarget().isDragon())
+			return false;
+		
+		return DRAGON_HUNTER.isSatisfied(input);
+	}
+	
+	public float tbowAttModifier(CalcInput input)
+	{
+		int magic = Math.max(250, input.getNpcTarget().getLevelMagic()) * 3; // todo cox detection?
+		
+		float mod = 140f + (magic - 10f) / 100f - (float) Math.pow(magic / 10f - 100f, 2) / 100f; // in %
+		return mod / 100f; // to multiplier
+	}
+
+	public float tbowDmgModifier(CalcInput input)
+	{
+		int magic = Math.min(250, input.getNpcTarget().getLevelMagic()); // todo cox detection?
+
+		int t1 = 250;
+		int t2 = (10 * 3 * magic / 10 - 14) / 100;
+		int t3 = ((3 * magic / 10 - 140) * (3 * magic / 10 - 140)) / 100;
+		int mod = Math.min(250, t1 + t2 - t3); // in %
+		return mod / 100f; // to multiplier
+	}
+	
+	public float leafyMod(CalcInput input)
+	{
+		if (!input.getNpcTarget().isLeafy())
+			return 1f;
+		
+		switch (input.getCombatMode())
+		{
+			case MAGE:
+				return input.getSpell() == Spell.MAGIC_DART ? 1f : 0f; // immune to other spells
+			case MELEE:
+				if (!LEAF_BLADED_MELEE.isSatisfied(input))
+					return 0f;
+				return LEAF_BLADED_BAXE.isSatisfied(input) ? 1.175f : 1f; // only baxe has bonus
+			default:
+				return LEAF_BLADED_RANGED.isSatisfied(input) ? 1f : 0f; // no bonuses, but required
+		}
+	}
+	
+	public boolean obsidianArmour(CalcInput input)
+	{
+		return OBSIDIAN_ARMOUR.isSatisfied(input) && OBSIDIAN_WEAPON.isSatisfied(input);
+	}
+	
+	public boolean obsidianNecklace(CalcInput input)
+	{
+		return OBSIDIAN_NECKLACE.isSatisfied(input) && OBSIDIAN_WEAPON.isSatisfied(input);
+	}
+	
+	public float inquisitorsMod(CalcInput input)
+	{
+		if (input.getWeaponMode().getMeleeStyle() != MeleeStyle.CRUSH) // crush only
+			return 1f;
+		
+		if (INQUISITOR_FULL.isSatisfied(input)) // 2.5% if all 3
+			return 1.025f;
+		
+		float mod = 1f; // otherwise 0.5% per piece
+		if (INQUISITOR_HELM.isSatisfied(input))
+			mod += 0.005f;
+		if (INQUISITOR_BODY.isSatisfied(input))
+			mod += 0.005f;
+		if (INQUISITOR_LEGS.isSatisfied(input))
+			mod += 0.005f;
+		
+		return mod;
 	}
 	
 }

@@ -117,6 +117,8 @@ public class MageDpsCalc extends AbstractCalc
 		
 		if (EquipmentRequirement.FIRE_TOME.isSatisfied(input) && spell.getDisplayName().startsWith("Fire"))
 			maxHit = (int) (maxHit * 1.5f);
+		
+		maxHit *= leafyMod(input);
 
 		return maxHit;
 	}

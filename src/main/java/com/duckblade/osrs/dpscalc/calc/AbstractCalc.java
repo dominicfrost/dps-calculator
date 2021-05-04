@@ -10,10 +10,8 @@ public abstract class AbstractCalc
 
 	abstract int maxHit(CalcInput input);
 	
-	float hitChance(CalcInput input)
+	float hitChance(int attRoll, int defRoll)
 	{
-		int attRoll = attackRoll(input);
-		int defRoll = defenseRoll(input);
 		
 		if (attRoll > defRoll)
 			return  1f - ((defRoll + 2f) / (2f * attRoll + 1f));
@@ -21,10 +19,23 @@ public abstract class AbstractCalc
 			return attRoll / (2f * defRoll + 1f);
 	}
 	
-	float calculateDPS(CalcInput input)
+	CalcResult calculateDPS(CalcInput input)
 	{
+		int attRoll = attackRoll(input);
+		int defRoll = defenseRoll(input);
+		int maxHit = maxHit(input);
+		float hitChance = hitChance(attRoll, defRoll);
+		
 		float weaponSpeed = input.getEquipmentStats().getSpeed();
-		return (maxHit(input) * hitChance(input)) / (2f * weaponSpeed * SECONDS_PER_TICK);
+		float dps = (maxHit * hitChance) / (2f * weaponSpeed * SECONDS_PER_TICK);
+		return CalcResult.builder()
+				.attackRoll(attRoll)
+				.defenseRoll(defRoll)
+				.maxHit(maxHit)
+				.hitChance(hitChance)
+				.hitRate(weaponSpeed * SECONDS_PER_TICK)
+				.dps(dps)
+				.build();
 	}
 	
 }

@@ -1,5 +1,6 @@
 package com.duckblade.osrs.dpscalc.ui.skills;
 
+import com.google.common.collect.ImmutableMap;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,24 +40,26 @@ public class SkillsPanel extends JPanel
 
 		add(Box.createVerticalStrut(10));
 
-		statBoxes = new HashMap<>(6);
-		statBoxes.put(ATTACK, new StatBox("att", true));
-		statBoxes.put(STRENGTH, new StatBox("str", true));
-		statBoxes.put(DEFENCE, new StatBox("def", true));
-		statBoxes.put(MAGIC, new StatBox("mage", true));
-		statBoxes.put(RANGED, new StatBox("range", true));
-		statBoxes.put(PRAYER, new StatBox("prayer", true));
+		statBoxes = new ImmutableMap.Builder<Skill, StatBox>()
+				.put(ATTACK, new StatBox("att", true))
+				.put(STRENGTH, new StatBox("str", true))
+				.put(DEFENCE, new StatBox("def", true))
+				.put(MAGIC, new StatBox("mage", true))
+				.put(RANGED, new StatBox("range", true))
+				.put(PRAYER, new StatBox("prayer", true))
+				.build();
 		add(new StatCategory("Player Stats", new ArrayList<>(statBoxes.values())));
 
 		add(Box.createVerticalStrut(10));
 
-		boostBoxes = new HashMap<>(6);
-		boostBoxes.put(ATTACK, new StatBox("att", true));
-		boostBoxes.put(STRENGTH, new StatBox("str", true));
-		boostBoxes.put(DEFENCE, new StatBox("def", true));
-		boostBoxes.put(MAGIC, new StatBox("mage", true));
-		boostBoxes.put(RANGED, new StatBox("range", true));
-		boostBoxes.put(PRAYER, new StatBox("prayer", true));
+		boostBoxes = new ImmutableMap.Builder<Skill, StatBox>()
+				.put(ATTACK, new StatBox("att", true))
+				.put(STRENGTH, new StatBox("str", true))
+				.put(DEFENCE, new StatBox("def", true))
+				.put(MAGIC, new StatBox("mage", true))
+				.put(RANGED, new StatBox("range", true))
+				.put(PRAYER, new StatBox("prayer", true))
+				.build();
 		add(new StatCategory("Boosts", new ArrayList<>(boostBoxes.values())));
 	}
 
@@ -64,7 +67,7 @@ public class SkillsPanel extends JPanel
 	{
 		if (client == null)
 			return; // ui test
-		
+
 		Player p = client.getLocalPlayer();
 		if (p == null)
 			return;
@@ -93,6 +96,11 @@ public class SkillsPanel extends JPanel
 		statBoxes.forEach((k, v) -> results.put(k, v.getValue()));
 		return results;
 	}
+	
+	public void setSkills(Map<Skill, Integer> newSkills)
+	{
+		newSkills.forEach((s, v) -> statBoxes.get(s).setValue(v));
+	}
 
 	public Map<Skill, Integer> getBoosts()
 	{
@@ -100,5 +108,10 @@ public class SkillsPanel extends JPanel
 		Map<Skill, Integer> results = new HashMap<>(6);
 		boostBoxes.forEach((k, v) -> results.put(k, v.getValue()));
 		return results;
+	}
+
+	public void setBoosts(Map<Skill, Integer> newSkills)
+	{
+		newSkills.forEach((s, v) -> boostBoxes.get(s).setValue(v));
 	}
 }

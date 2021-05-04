@@ -36,6 +36,19 @@ public class MeleeDpsCalc extends AbstractCalc
 		
 		if (voidLevel(input) != 0)
 			str = (int) (str * 1.1f);
+
+		if (dragonHunter(input))
+			str = (int) (str * 1.2f);
+
+		str = (int) (str * leafyMod(input));
+
+		if (obsidianArmour(input))
+			str = (int) (str * 1.1f);
+
+		if (obsidianNecklace(input))
+			str = (int) (str * 1.2f); // obisidian bonuses stack
+
+		str = (int) (str * inquisitorsMod(input));
 		
 		return str;
 	}
@@ -54,6 +67,16 @@ public class MeleeDpsCalc extends AbstractCalc
 		
 		if (voidLevel(input) != 0)
 			att = (int) (att * 1.1f);
+		
+		if (dragonHunter(input))
+			att = (int) (att * 1.2f);
+		
+		att = (int) (att * leafyMod(input));
+		
+		if (obsidianArmour(input))
+			att = (int) (att * 1.1f); // no necklace, accuracy penalty is done in item stats
+		
+		att = (int) (att * inquisitorsMod(input));
 		
 		return att;
 	}
