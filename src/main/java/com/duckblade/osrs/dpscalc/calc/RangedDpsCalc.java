@@ -64,6 +64,9 @@ public class RangedDpsCalc extends AbstractCalc
 
 		maxHit = (int) (maxHit * leafyMod(input));
 
+		if (input.getNpcTarget().getName().contains("Zulrah"))
+			maxHit = Math.min(maxHit, 50);
+
 		return maxHit;
 	}
 

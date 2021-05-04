@@ -8,8 +8,8 @@ import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.NpcStats;
 import com.duckblade.osrs.dpscalc.model.WeaponMode;
 import com.duckblade.osrs.dpscalc.ui.equip.EquipmentPanel;
-import com.duckblade.osrs.dpscalc.ui.prayer.PrayerPanel;
 import com.duckblade.osrs.dpscalc.ui.npc.NpcStatsPanel;
+import com.duckblade.osrs.dpscalc.ui.prayer.PrayerPanel;
 import com.duckblade.osrs.dpscalc.ui.skills.SkillsPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +18,8 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.net.URI;
 import java.text.DecimalFormat;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -60,16 +62,13 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	private final JLabel dpsValue;
 	private static final String DPS_CALC_FAIL = "???";
-	
-	private final JLabel attackRollLabel;
-	private final JLabel defenseRollLabel;
-	private final JLabel hitChanceLabel;
-	private final JLabel maxHitLabel;
-	private final JLabel hitRateLabel;
-	
+
+	private final List<CalcResultLabel> resultLabels;
+
 	private static final DecimalFormat DPS_FORMAT = new DecimalFormat("#.###");
+	private static final DecimalFormat ROLL_FORMAT = new DecimalFormat("#,###");
 	private static final DecimalFormat HIT_CHANCE_FORMAT = new DecimalFormat("#.#%");
-	private static final DecimalFormat HIT_RATE_FORMAT = new DecimalFormat("#.#");
+	private static final DecimalFormat HIT_RATE_FORMAT = new DecimalFormat("#.# 'secs'");
 
 	private static final String GITHUB_LINK = "https://github.com/LlemonDuck/dps-calculator";
 
@@ -130,8 +129,8 @@ public class DpsCalculatorPanel extends PluginPanel
 		skillsNav = new MenuPanelNavEntry("Skills", "Not Set", this::openSkills);
 		menuPanel.add(skillsNav);
 		menuPanel.add(Box.createVerticalStrut(5));
-		
-		prayerNav = new MenuPanelNavEntry("Extras", "Not Set", this::openPrayer);
+
+		prayerNav = new MenuPanelNavEntry("Prayer", "Not Set", this::openPrayer);
 		menuPanel.add(prayerNav);
 		menuPanel.add(Box.createVerticalStrut(20));
 
@@ -148,43 +147,24 @@ public class DpsCalculatorPanel extends PluginPanel
 		dpsValue.setForeground(Color.white);
 		dpsValue.setFont(dpsFont);
 		menuPanel.add(dpsValue);
-		
+
 		menuPanel.add(Box.createVerticalStrut(5));
 
-		attackRollLabel = new JLabel();
-		attackRollLabel.setFont(FontManager.getRunescapeBoldFont());
-		attackRollLabel.setForeground(Color.white);
-		attackRollLabel.setAlignmentX(CENTER_ALIGNMENT);
-		attackRollLabel.setVisible(false);
-		menuPanel.add(attackRollLabel);
-		
-		defenseRollLabel = new JLabel();
-		defenseRollLabel.setFont(FontManager.getRunescapeBoldFont());
-		defenseRollLabel.setForeground(Color.white);
-		defenseRollLabel.setAlignmentX(CENTER_ALIGNMENT);
-		defenseRollLabel.setVisible(false);
-		menuPanel.add(defenseRollLabel);
-		
-		hitChanceLabel = new JLabel();
-		hitChanceLabel.setFont(FontManager.getRunescapeBoldFont());
-		hitChanceLabel.setForeground(Color.white);
-		hitChanceLabel.setAlignmentX(CENTER_ALIGNMENT);
-		hitChanceLabel.setVisible(false);
-		menuPanel.add(hitChanceLabel);
-		
-		maxHitLabel = new JLabel();
-		maxHitLabel.setFont(FontManager.getRunescapeBoldFont());
-		maxHitLabel.setForeground(Color.white);
-		maxHitLabel.setAlignmentX(CENTER_ALIGNMENT);
-		maxHitLabel.setVisible(false);
-		menuPanel.add(maxHitLabel);
-		
-		hitRateLabel = new JLabel();
-		hitRateLabel.setFont(FontManager.getRunescapeBoldFont());
-		hitRateLabel.setForeground(Color.white);
-		hitRateLabel.setAlignmentX(CENTER_ALIGNMENT);
-		hitRateLabel.setVisible(false);
-		menuPanel.add(hitRateLabel);
+		resultLabels = Arrays.asList(
+				new CalcResultLabel("Max Attack Roll:", r -> ROLL_FORMAT.format(r.getAttackRoll())),
+				new CalcResultLabel("NPC Defense Roll:", r -> ROLL_FORMAT.format(r.getDefenseRoll())),
+				new CalcResultLabel("Max Hit:", r -> String.valueOf(r.getMaxHit())),
+				new CalcResultLabel("Hit Chance:", r -> HIT_CHANCE_FORMAT.format(r.getHitChance())),
+				new CalcResultLabel("Hit Every:", r -> HIT_RATE_FORMAT.format(r.getHitRate())),
+				new CalcResultLabel("Prayer Lasts:", r ->
+				{
+					int seconds = r.getPrayerSeconds();
+					if (seconds == -1)
+						return "N/A"; //infinity
+					return String.format("%d:%d", seconds / 60, seconds % 60);
+				})
+		);
+		resultLabels.forEach(menuPanel::add);
 	}
 
 	private void openGhLink()
@@ -210,47 +190,36 @@ public class DpsCalculatorPanel extends PluginPanel
 
 	private void calculateDps()
 	{
-		if (!npcStatsPanel.isReady() || !equipmentPanel.isReady() || !skillsPanel.isReady())
+		SwingUtilities.invokeLater(() ->
 		{
-			dpsValue.setText(DPS_CALC_FAIL);
-			attackRollLabel.setVisible(false);
-			defenseRollLabel.setVisible(false);
-			hitChanceLabel.setVisible(false);
-			maxHitLabel.setVisible(false);
-			hitRateLabel.setVisible(false);
-			return;
-		}
+			if (!npcStatsPanel.isReady() || !equipmentPanel.isReady() || !skillsPanel.isReady())
+			{
+				dpsValue.setText(DPS_CALC_FAIL);
+				resultLabels.forEach(l -> l.setValue(null));
+				return;
+			}
 
-		WeaponMode weaponMode = equipmentPanel.getWeaponMode();
-		Map<EquipmentInventorySlot, ItemStats> equipment = equipmentPanel.getEquipment();
+			WeaponMode weaponMode = equipmentPanel.getWeaponMode();
+			Map<EquipmentInventorySlot, ItemStats> equipment = equipmentPanel.getEquipment();
 
-		CalcInput input = CalcInput.builder()
-				.npcTarget(npcStatsPanel.toNpcStats())
-				.combatMode(weaponMode.getMode())
-				.weaponMode(weaponMode)
-				.playerEquipment(equipment)
-				.equipmentStats(EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts()))
-				.playerSkills(skillsPanel.getSkills())
-				.playerBoosts(skillsPanel.getBoosts())
-				.spell(equipmentPanel.getSpell())
-				.onSlayerTask(equipmentPanel.isOnSlayerTask())
-				.offensivePrayer(prayerPanel.getOffensive())
-				.prayerDrain(prayerPanel.getDrain())
-				.build();
+			CalcInput input = CalcInput.builder()
+					.npcTarget(npcStatsPanel.toNpcStats())
+					.combatMode(weaponMode.getMode())
+					.weaponMode(weaponMode)
+					.playerEquipment(equipment)
+					.equipmentStats(EquipmentStats.fromMap(equipment, weaponMode, equipmentPanel.getTbpDarts()))
+					.playerSkills(skillsPanel.getSkills())
+					.playerBoosts(skillsPanel.getBoosts())
+					.spell(equipmentPanel.getSpell())
+					.onSlayerTask(equipmentPanel.isOnSlayerTask())
+					.offensivePrayer(prayerPanel.getOffensive())
+					.prayerDrain(prayerPanel.getDrain())
+					.build();
 
-		CalcResult result = calcManager.calculateDPS(input);
-		dpsValue.setText(DPS_FORMAT.format(result.getDps()));
-
-		attackRollLabel.setVisible(true);
-		attackRollLabel.setText("Attack roll: " + result.getAttackRoll());
-		defenseRollLabel.setVisible(true);
-		defenseRollLabel.setText("Defense roll: " + result.getDefenseRoll());
-		hitChanceLabel.setVisible(true);
-		hitChanceLabel.setText("Hit chance: " + HIT_CHANCE_FORMAT.format(result.getHitChance()));
-		maxHitLabel.setVisible(true);
-		maxHitLabel.setText("Max hit: " + result.getMaxHit());
-		hitRateLabel.setVisible(true);
-		hitRateLabel.setText("Hit speed: " + HIT_RATE_FORMAT.format(result.getHitRate()) + " seconds");
+			CalcResult result = calcManager.calculateDPS(input);
+			dpsValue.setText(DPS_FORMAT.format(result.getDps()));
+			resultLabels.forEach(l -> l.setValue(result));
+		});
 	}
 
 	public void openMenu()
@@ -303,7 +272,7 @@ public class DpsCalculatorPanel extends PluginPanel
 			repaint();
 		});
 	}
-	
+
 	public void openPrayer()
 	{
 		SwingUtilities.invokeLater(() ->

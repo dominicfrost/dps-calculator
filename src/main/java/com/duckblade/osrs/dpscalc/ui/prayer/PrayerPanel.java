@@ -4,6 +4,7 @@ import com.duckblade.osrs.dpscalc.model.Prayer;
 import com.duckblade.osrs.dpscalc.ui.util.CustomJCheckBox;
 import com.duckblade.osrs.dpscalc.ui.util.CustomJComboBox;
 import com.google.common.collect.ImmutableMap;
+import java.awt.Dimension;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -11,7 +12,9 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import net.runelite.client.ui.PluginPanel;
 
 @Singleton
 public class PrayerPanel extends JPanel
@@ -24,16 +27,24 @@ public class PrayerPanel extends JPanel
 	public PrayerPanel()
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setMinimumSize(new Dimension(PluginPanel.PANEL_WIDTH, 0));
 		
 		offensePrayerSelect = new CustomJComboBox<>(Prayer.OFFENSE, Prayer::getDisplayName, "Offensive Prayer");
+		offensePrayerSelect.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 25, 40));
+		offensePrayerSelect.setAlignmentX(LEFT_ALIGNMENT);
 		add(offensePrayerSelect);
 
-		Box.createVerticalStrut(5);
+		add(Box.createVerticalStrut(10));
+		
+		add(new JLabel("Other Prayers"));
+		add(Box.createVerticalStrut(5));
 		
 		ImmutableMap.Builder<Prayer, CustomJCheckBox> builder = new ImmutableMap.Builder<>();
 		Prayer.UTILITY.forEach(prayer ->
 		{
 			CustomJCheckBox check = new CustomJCheckBox(prayer.getDisplayName());
+			check.setAlignmentX(LEFT_ALIGNMENT);
+			
 			add(check);
 			add(Box.createVerticalStrut(5));
 			builder.put(prayer, check);
@@ -62,7 +73,9 @@ public class PrayerPanel extends JPanel
 
 	public int getDrain()
 	{
-		return offensePrayerSelect.getValue().getDrainRate() +
+		Prayer oPrayer = offensePrayerSelect.getValue();
+		int oDrain = oPrayer == null ? 0 : oPrayer.getDrainRate();
+		return oDrain +
 				getOthers().stream()
 						.mapToInt(Prayer::getDrainRate)
 						.sum();
@@ -84,7 +97,7 @@ public class PrayerPanel extends JPanel
 		else if (enabledOthers.isEmpty())
 			return offense.getDisplayName();
 		else
-			return offense.getDisplayName() + " + " + otherPrayers + " others";
+			return offense.getDisplayName() + " + " + otherPrayers.size() + " others";
 	}
 
 }

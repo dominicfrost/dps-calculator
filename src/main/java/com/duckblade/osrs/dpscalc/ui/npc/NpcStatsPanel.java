@@ -42,6 +42,14 @@ public class NpcStatsPanel extends JPanel
 	private final StatBox magicBox;
 	private final StatBox rangedBox;
 
+	// offensive bonuses
+	private final StatBox bonusAttackBox;
+	private final StatBox bonusStrengthBox;
+	private final StatBox magicAccuracyBox;
+	private final StatBox magicDamageBox;
+	private final StatBox rangedAccuracyBox;
+	private final StatBox rangedStrengthBox;
+
 	// defensive bonuses
 	private final StatBox bonusDefStabBox;
 	private final StatBox bonusDefSlashBox;
@@ -112,6 +120,13 @@ public class NpcStatsPanel extends JPanel
 		magicBox = new StatBox("mage");
 		rangedBox = new StatBox("range");
 
+		bonusAttackBox = new StatBox("attbns");
+		bonusStrengthBox = new StatBox("strbns");
+		magicAccuracyBox = new StatBox("amagic");
+		magicDamageBox = new StatBox("mbns");
+		rangedAccuracyBox = new StatBox("arange");
+		rangedStrengthBox = new StatBox("rngbns");
+
 		bonusDefStabBox = new StatBox("dstab");
 		bonusDefSlashBox = new StatBox("dslash");
 		bonusDefCrushBox = new StatBox("dcrush");
@@ -125,6 +140,16 @@ public class NpcStatsPanel extends JPanel
 				defenseBox,
 				magicBox,
 				rangedBox
+		)));
+		add(Box.createVerticalStrut(5));
+
+		add(new StatCategory("Offensive Bonuses", Arrays.asList(
+				bonusAttackBox,
+				bonusStrengthBox,
+				magicAccuracyBox,
+				magicDamageBox,
+				rangedAccuracyBox,
+				rangedStrengthBox
 		)));
 		add(Box.createVerticalStrut(5));
 
@@ -198,6 +223,14 @@ public class NpcStatsPanel extends JPanel
 				defenseBox.getValue(),
 				magicBox.getValue(),
 				rangedBox.getValue(),
+				
+				// offensive bonuses
+				bonusAttackBox.getValue(),
+				bonusStrengthBox.getValue(),
+				magicAccuracyBox.getValue(),
+				magicDamageBox.getValue(),
+				rangedAccuracyBox.getValue(),
+				rangedStrengthBox.getValue(),
 
 				// defensive bonuses
 				bonusDefStabBox.getValue(),
@@ -241,6 +274,14 @@ public class NpcStatsPanel extends JPanel
 		defenseBox.setValue(stats.getLevelDefense());
 		magicBox.setValue(stats.getLevelMagic());
 		rangedBox.setValue(stats.getLevelRanged());
+		
+		// offensive bonuses
+		bonusAttackBox.setValue(stats.getBonusAttack());
+		bonusStrengthBox.setValue(stats.getBonusStrength());
+		magicAccuracyBox.setValue(stats.getMagicAccuracy());
+		magicDamageBox.setValue(stats.getMagicDamage());
+		rangedAccuracyBox.setValue(stats.getRangedAccuracy());
+		rangedStrengthBox.setValue(stats.getRangedStrength());
 
 		// defensive bonuses
 		bonusDefStabBox.setValue(stats.getBonusDefenseStab());

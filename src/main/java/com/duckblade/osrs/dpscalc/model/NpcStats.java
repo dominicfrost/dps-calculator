@@ -26,6 +26,19 @@ public class NpcStats
 	@SerializedName("range")
 	int levelRanged = 1;
 
+	@SerializedName("attbns")
+	int bonusAttack;
+	@SerializedName("strbns")
+	int bonusStrength;
+	@SerializedName("amagic")
+	int magicAccuracy;
+	@SerializedName("mbns")
+	int magicDamage;
+	@SerializedName("arange")
+	int rangedAccuracy;
+	@SerializedName("rngbns")
+	int rangedStrength;
+
 	@SerializedName("dstab")
 	int bonusDefenseStab = 0;
 	@SerializedName("dslash")

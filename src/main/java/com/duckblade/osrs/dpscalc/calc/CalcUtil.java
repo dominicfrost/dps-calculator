@@ -3,15 +3,13 @@ package com.duckblade.osrs.dpscalc.calc;
 import com.duckblade.osrs.dpscalc.model.CombatMode;
 import com.duckblade.osrs.dpscalc.model.MeleeStyle;
 import com.duckblade.osrs.dpscalc.model.Spell;
-import lombok.experimental.UtilityClass;
 
 import static com.duckblade.osrs.dpscalc.calc.EquipmentRequirement.*;
 
-@UtilityClass
 public class CalcUtil
 {
 	
-	public boolean blackMask(CalcInput input)
+	public static boolean blackMask(CalcInput input)
 	{
 		if (!input.isOnSlayerTask())
 			return false;
@@ -23,7 +21,7 @@ public class CalcUtil
 	}
 	
 	// salve has 3 levels - off, on, enhanced
-	public int salveLevel(CalcInput input)
+	public static int salveLevel(CalcInput input)
 	{
 		if (!input.getNpcTarget().isUndead())
 			return 0;
@@ -40,7 +38,7 @@ public class CalcUtil
 	}
 	
 	// void also has 3 levels, but only for ranged/mage
-	public int voidLevel(CalcInput input)
+	public static int voidLevel(CalcInput input)
 	{
 		if (input.getCombatMode() == CombatMode.MELEE)
 			return VOID_MELEE.isSatisfied(input) ? 1 : 0;
@@ -53,7 +51,7 @@ public class CalcUtil
 		return VOID_ELITE.isSatisfied(input) ? 2 : 1;
 	}
 	
-	public boolean dragonHunter(CalcInput input)
+	public static boolean dragonHunter(CalcInput input)
 	{
 		if (!input.getNpcTarget().isDragon())
 			return false;
@@ -61,17 +59,19 @@ public class CalcUtil
 		return DRAGON_HUNTER.isSatisfied(input);
 	}
 	
-	public float tbowAttModifier(CalcInput input)
+	public static float tbowAttModifier(CalcInput input)
 	{
-		int magic = Math.max(250, input.getNpcTarget().getLevelMagic()) * 3; // todo cox detection?
+		int magic = Math.max(input.getNpcTarget().getMagicAccuracy(), input.getNpcTarget().getLevelMagic()); // todo cox detection?
+		magic = Math.min(250, magic);
 		
 		float mod = 140f + (magic - 10f) / 100f - (float) Math.pow(magic / 10f - 100f, 2) / 100f; // in %
 		return mod / 100f; // to multiplier
 	}
 
-	public float tbowDmgModifier(CalcInput input)
+	public static float tbowDmgModifier(CalcInput input)
 	{
-		int magic = Math.min(250, input.getNpcTarget().getLevelMagic()); // todo cox detection?
+		int magic = Math.max(input.getNpcTarget().getMagicAccuracy(), input.getNpcTarget().getLevelMagic()); // todo cox detection?
+		magic = Math.min(250, magic);
 
 		int t1 = 250;
 		int t2 = (10 * 3 * magic / 10 - 14) / 100;
@@ -80,7 +80,7 @@ public class CalcUtil
 		return mod / 100f; // to multiplier
 	}
 	
-	public float leafyMod(CalcInput input)
+	public static float leafyMod(CalcInput input)
 	{
 		if (!input.getNpcTarget().isLeafy())
 			return 1f;
@@ -98,17 +98,17 @@ public class CalcUtil
 		}
 	}
 	
-	public boolean obsidianArmour(CalcInput input)
+	public static boolean obsidianArmour(CalcInput input)
 	{
 		return OBSIDIAN_ARMOUR.isSatisfied(input) && OBSIDIAN_WEAPON.isSatisfied(input);
 	}
 	
-	public boolean obsidianNecklace(CalcInput input)
+	public static boolean obsidianNecklace(CalcInput input)
 	{
 		return OBSIDIAN_NECKLACE.isSatisfied(input) && OBSIDIAN_WEAPON.isSatisfied(input);
 	}
 	
-	public float inquisitorsMod(CalcInput input)
+	public static float inquisitorsMod(CalcInput input)
 	{
 		if (input.getWeaponMode().getMeleeStyle() != MeleeStyle.CRUSH) // crush only
 			return 1f;

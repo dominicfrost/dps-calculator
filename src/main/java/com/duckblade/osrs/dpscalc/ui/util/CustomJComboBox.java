@@ -35,7 +35,7 @@ public class CustomJComboBox<T> extends JPanel
 		comboBox.setPrototypeDisplayValue("");
 		comboBox.addActionListener(e ->
 		{
-			if (callbackEnabled)
+			if (callbackEnabled && callback != null)
 				callback.run();
 		});
 		setItems(items);

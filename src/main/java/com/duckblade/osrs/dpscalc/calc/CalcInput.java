@@ -38,10 +38,8 @@ public class CalcInput
 
 	private final int prayerDrain;
 
-	@Builder.Default
-	private final boolean onSlayerTask = false; // slayer helms
+	private final boolean onSlayerTask; // slayer helms
 	
-	@Builder.Default
-	private final boolean usingCharge = false;
+	private final boolean usingCharge;
 
 }

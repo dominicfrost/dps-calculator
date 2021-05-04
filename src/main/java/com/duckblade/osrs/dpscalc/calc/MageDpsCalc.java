@@ -11,10 +11,7 @@ import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.ItemID;
 import net.runelite.api.Skill;
 
-import static com.duckblade.osrs.dpscalc.calc.CalcUtil.blackMask;
-import static com.duckblade.osrs.dpscalc.calc.CalcUtil.leafyMod;
-import static com.duckblade.osrs.dpscalc.calc.CalcUtil.salveLevel;
-import static com.duckblade.osrs.dpscalc.calc.CalcUtil.voidLevel;
+import static com.duckblade.osrs.dpscalc.calc.CalcUtil.*;
 import static com.duckblade.osrs.dpscalc.model.Spell.*;
 
 @Singleton
@@ -123,6 +120,9 @@ public class MageDpsCalc extends AbstractCalc
 			maxHit = (int) (maxHit * 1.5f);
 		
 		maxHit *= leafyMod(input);
+		
+		if (input.getNpcTarget().getName().contains("Zulrah"))
+			maxHit = Math.min(maxHit, 50);
 
 		return maxHit;
 	}

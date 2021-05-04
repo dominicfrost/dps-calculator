@@ -50,7 +50,7 @@ public class DPSCalcUITest
 			PrayerPanel pp = new PrayerPanel(); // heh
 
 			// preloading (current is tbow max hit)
-			nsp.loadNpcStats(npcDataManager.getNpcStatsById(NpcID.ZULRAH_2044));
+			nsp.loadNpcStats(npcDataManager.getNpcStatsById(NpcID.BRUTAL_BLACK_DRAGON));
 			ep.setEquipment(ImmutableMap.of(
 					EquipmentInventorySlot.WEAPON, itemDataManager.getItemStatsById(ItemID.TWISTED_BOW),
 					EquipmentInventorySlot.AMMO, itemDataManager.getItemStatsById(ItemID.DRAGON_ARROW),

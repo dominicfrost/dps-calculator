@@ -17,4 +17,6 @@ public class CalcResult
 	
 	private final float dps;
 	
+	private final int prayerSeconds;
+	
 }
