@@ -127,4 +127,18 @@ public class CalcUtil
 		return mod;
 	}
 	
+	public static int demonbaneLevel(CalcInput input)
+	{
+		if (!input.getNpcTarget().isDemon())
+			return 0;
+		
+		if (DEMONBANE_ARCLIGHT.isSatisfied(input))
+			return 2;
+		else if (DEMONBANE_DARKLIGHT.isSatisfied(input) || DEMONBANE_SILVERLIGHT.isSatisfied(input))
+			// i think they're the same, but wiki isn't clear
+			return 1;
+		else
+			return 0;
+	}
+	
 }

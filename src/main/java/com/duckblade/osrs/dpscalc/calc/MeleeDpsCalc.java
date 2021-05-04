@@ -51,6 +51,12 @@ public class MeleeDpsCalc extends AbstractCalc
 
 		if (obsidianNecklace(input))
 			str = (int) (str * 1.2f); // obisidian bonuses stack
+		
+		int demonbane = demonbaneLevel(input);
+		if (demonbane == 2)
+			str = (int) (str * 1.7f);
+		else if (demonbane == 1)
+			str = (int) (str * 1.6f);
 
 		str = (int) (str * inquisitorsMod(input));
 
@@ -84,6 +90,9 @@ public class MeleeDpsCalc extends AbstractCalc
 			att = (int) (att * 1.1f); // no necklace, accuracy penalty is done in item stats
 
 		att = (int) (att * inquisitorsMod(input));
+
+		if (demonbaneLevel(input) == 2)
+			att = (int) (att * 1.7f);
 
 		return att;
 	}

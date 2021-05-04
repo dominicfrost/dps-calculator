@@ -37,6 +37,9 @@ public enum EquipmentRequirement
 	INQUISITOR_BODY(new EquipmentInventorySlot[] {BODY}, new int[][] {{INQUISITORS_HAUBERK}}),
 	INQUISITOR_LEGS(new EquipmentInventorySlot[] {LEGS}, new int[][] {{INQUISITORS_PLATESKIRT}}),
 	INQUISITOR_FULL(new EquipmentInventorySlot[] {HEAD, BODY, LEGS}, new int[][] {{INQUISITORS_GREAT_HELM}, {INQUISITORS_HAUBERK}, {INQUISITORS_PLATESKIRT}}),
+	DEMONBANE_SILVERLIGHT(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{SILVERLIGHT}}),
+	DEMONBANE_DARKLIGHT(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{DARKLIGHT}}),
+	DEMONBANE_ARCLIGHT(new EquipmentInventorySlot[] {WEAPON}, new int[][] {{ARCLIGHT}}),
 	;
 
 	private final EquipmentInventorySlot[] slots;
