@@ -9,7 +9,7 @@ import java.util.List;
 public class StatCategory extends JPanel
 {
 
-	private static JPanel buildSubPanel(List<StatBox> elements)
+	private static JPanel buildSubPanel(List<? extends StatBox> elements)
 	{
 		JPanel subPanel = new JPanel();
 		subPanel.setLayout(new BoxLayout(subPanel, BoxLayout.X_AXIS));
@@ -17,7 +17,7 @@ public class StatCategory extends JPanel
 		return subPanel;
 	}
 
-	public StatCategory(String title, List<StatBox> innerStats)
+	public StatCategory(String title, List<? extends StatBox> innerStats)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		setBorder(BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR, 5));
@@ -28,12 +28,12 @@ public class StatCategory extends JPanel
 		titleLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 		add(titleLabel);
 
-		List<StatBox> upperStats = innerStats.subList(0, 3);
+		List<? extends StatBox> upperStats = innerStats.subList(0, 3);
 		JPanel upperPanel = buildSubPanel(upperStats);
 		upperPanel.setBorder(BorderFactory.createEmptyBorder(3, 0, 3, 0));
 		add(upperPanel);
 
-		List<StatBox> lowerStats = innerStats.subList(3, innerStats.size());
+		List<? extends StatBox> lowerStats = innerStats.subList(3, innerStats.size());
 		add(buildSubPanel(lowerStats));
 	}
 }

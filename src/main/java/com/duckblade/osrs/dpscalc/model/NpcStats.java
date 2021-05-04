@@ -1,64 +1,44 @@
 package com.duckblade.osrs.dpscalc.model;
 
-import com.google.gson.annotations.SerializedName;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor // for npcstatspanel
-@NoArgsConstructor // for gson
+@Builder
 public class NpcStats
 {
 
-	String name;
+	private int id;
+	private String name;
 
-	@SerializedName("hitpoints")
-	int levelHp = 1;
-	@SerializedName("att")
-	int levelAttack = 1;
-	@SerializedName("str")
-	int levelStrength = 1;
-	@SerializedName("def")
-	int levelDefense = 1;
-	@SerializedName("mage")
-	int levelMagic = 1;
-	@SerializedName("range")
-	int levelRanged = 1;
+	private int levelHp;
+	private int levelAttack;
+	private int levelStrength;
+	private int levelDefense;
+	private int levelMagic;
+	private int levelRanged;
 
-	@SerializedName("attbns")
-	int bonusAttack;
-	@SerializedName("strbns")
-	int bonusStrength;
-	@SerializedName("amagic")
-	int magicAccuracy;
-	@SerializedName("mbns")
-	int magicDamage;
-	@SerializedName("arange")
-	int rangedAccuracy;
-	@SerializedName("rngbns")
-	int rangedStrength;
+	private int attackBonus;
+	private int strengthBonus;
+	private int magicAccuracy;
+	private int magicDamage;
+	private int rangedAccuracy;
+	private int rangedStrength;
 
-	@SerializedName("dstab")
-	int bonusDefenseStab = 0;
-	@SerializedName("dslash")
-	int bonusDefenseSlash = 0;
-	@SerializedName("dcrush")
-	int bonusDefenseCrush = 0;
-	@SerializedName("dmagic")
-	int bonusDefenseMagic = 0;
-	@SerializedName("drange")
-	int bonusDefenseRange = 0;
+	private int defenseStab;
+	private int defenseSlash;
+	private int defenseCrush;
+	private int defenseMagic;
+	private int defenseRanged;
 
-	@SerializedName("combat")
-	int combatLevel = 0;
+	private int combatLevel;
 
-	boolean isDemon;
-	boolean isDragon;
-	boolean isKalphite;
-	boolean isLeafy;
-	boolean isUndead;
-	boolean isVampyre;
-	boolean isXerician;
+	private boolean isDemon;
+	private boolean isDragon;
+	private boolean isKalphite;
+	private boolean isLeafy;
+	private boolean isUndead;
+	private boolean isVampyre;
+	private boolean isXerician;
 
 }

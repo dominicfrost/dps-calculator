@@ -113,7 +113,7 @@ public class RangedDpsCalc extends AbstractCalc
 	public int defenseRoll(CalcInput input)
 	{
 		int defRoll = input.getNpcTarget().getLevelDefense() + 9;
-		defRoll *= (input.getNpcTarget().getBonusDefenseRange() + 64);
+		defRoll *= (input.getNpcTarget().getDefenseRanged() + 64);
 		return defRoll;
 	}
 

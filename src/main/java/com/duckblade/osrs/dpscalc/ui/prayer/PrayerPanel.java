@@ -87,17 +87,18 @@ public class PrayerPanel extends JPanel
 		List<Prayer> enabledOthers = getOthers();
 		if (offense == null && enabledOthers.isEmpty())
 			return "None";
-
+	
+		boolean multipleOther = enabledOthers.size() != 1;
 		if (offense == null)
 		{
-			if (enabledOthers.size() == 1)
+			if (!multipleOther)
 				return enabledOthers.get(0).getDisplayName();
 			return enabledOthers.size() + " prayers";
 		}
 		else if (enabledOthers.isEmpty())
 			return offense.getDisplayName();
 		else
-			return offense.getDisplayName() + " + " + otherPrayers.size() + " others";
+			return offense.getDisplayName() + " + " + enabledOthers.size() + " other" + (multipleOther ? "s" : "");
 	}
 
 }

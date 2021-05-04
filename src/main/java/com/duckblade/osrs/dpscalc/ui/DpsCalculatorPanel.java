@@ -155,13 +155,13 @@ public class DpsCalculatorPanel extends PluginPanel
 				new CalcResultLabel("NPC Defense Roll:", r -> ROLL_FORMAT.format(r.getDefenseRoll())),
 				new CalcResultLabel("Max Hit:", r -> String.valueOf(r.getMaxHit())),
 				new CalcResultLabel("Hit Chance:", r -> HIT_CHANCE_FORMAT.format(r.getHitChance())),
-				new CalcResultLabel("Hit Every:", r -> HIT_RATE_FORMAT.format(r.getHitRate())),
+				new CalcResultLabel("Attack Every:", r -> HIT_RATE_FORMAT.format(r.getHitRate())),
 				new CalcResultLabel("Prayer Lasts:", r ->
 				{
 					int seconds = r.getPrayerSeconds();
 					if (seconds == -1)
 						return "N/A"; //infinity
-					return String.format("%d:%d", seconds / 60, seconds % 60);
+					return String.format("%02d:%02d", seconds / 60, seconds % 60);
 				})
 		);
 		resultLabels.forEach(menuPanel::add);

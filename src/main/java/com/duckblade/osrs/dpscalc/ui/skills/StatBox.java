@@ -16,16 +16,11 @@ public class StatBox extends JPanel
 
 	private final JTextField valueField;
 
-	public StatBox(String iconName)
-	{
-		this(iconName, false);
-	}
-
 	public StatBox(String iconName, boolean editable)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
-		BufferedImage icon = ImageUtil.loadImageResource(getClass(), "icon_" + iconName + ".png");
+		BufferedImage icon = ImageUtil.loadImageResource(StatBox.class, "icon_" + iconName + ".png");
 		icon = ImageUtil.resizeCanvas(icon, 25, 25);
 		JLabel iconLabel = new JLabel(new ImageIcon(icon));
 		iconLabel.setAlignmentX(Component.CENTER_ALIGNMENT);

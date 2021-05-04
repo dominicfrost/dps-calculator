@@ -6,9 +6,11 @@ import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import lombok.extern.slf4j.Slf4j;
@@ -20,15 +22,20 @@ public class NpcDataManager
 
 	private static final Gson GSON = new Gson();
 
-	private final Map<Integer, NpcStats> ALL_STATS;
-	private final Map<String, Map<Integer, NpcStats>> ALL_STATS_BY_NAME;
+	private final Map<Integer, NpcStats> NPC_MAP;
+	private final Map<Integer, Integer> ID_MERGE_MAP;
 
 	@Inject
 	public NpcDataManager()
 	{
-		try (InputStream fileStream = getClass().getResourceAsStream("npcs-dps-calc.min.json"); InputStreamReader reader = new InputStreamReader(fileStream))
+		try (InputStream fsNpcData = getClass().getResourceAsStream("npcs.min.json"); InputStreamReader readerNpcData = new InputStreamReader(fsNpcData); InputStream fsIdMap = getClass().getResourceAsStream("npc-base-ids.min.json"); InputStreamReader readerIdMap = new InputStreamReader(fsIdMap);
+		)
 		{
-			ALL_STATS = GSON.fromJson(reader, new TypeToken<HashMap<Integer, NpcStats>>()
+			NPC_MAP = GSON.fromJson(readerNpcData, new TypeToken<HashMap<Integer, NpcStats>>()
+			{
+			}.getType());
+
+			ID_MERGE_MAP = GSON.fromJson(readerIdMap, new TypeToken<HashMap<Integer, Integer>>()
 			{
 			}.getType());
 		}
@@ -37,36 +44,20 @@ public class NpcDataManager
 			log.error("Failed to load NPC data", e);
 			throw new IllegalStateException(e);
 		}
-
-		ALL_STATS_BY_NAME = new HashMap<>(ALL_STATS.size());
-		for (Map.Entry<Integer, NpcStats> entry : ALL_STATS.entrySet())
-		{
-			if (entry.getValue().getName() != null && entry.getValue().getCombatLevel() != 0)
-			{
-				ALL_STATS_BY_NAME.computeIfAbsent(entry.getValue().getName(), s -> new HashMap<>(10))
-						.put(entry.getValue().getCombatLevel(), entry.getValue());
-			}
-		}
 	}
 
-	public String[] getAllNpcNames()
+	public List<NpcStats> getAll()
 	{
-		return Stream.concat(
-				Stream.of(""),
-				ALL_STATS_BY_NAME.keySet()
-						.stream())
-				.sorted()
-				.toArray(String[]::new);
-	}
-
-	public Map<Integer, NpcStats> getNpcStatsByName(String npcName)
-	{
-		return ALL_STATS_BY_NAME.get(npcName);
+		return NPC_MAP.values()
+				.stream()
+				.sorted(Comparator.comparing(NpcStats::getName))
+				.collect(Collectors.toList());
 	}
 
 	public NpcStats getNpcStatsById(int npcId)
 	{
-		return ALL_STATS.get(npcId);
+		int baseId = ID_MERGE_MAP.getOrDefault(npcId, npcId);
+		return NPC_MAP.get(baseId);
 	}
 
 }

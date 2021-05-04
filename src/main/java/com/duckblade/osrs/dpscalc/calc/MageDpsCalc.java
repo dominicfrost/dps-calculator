@@ -96,7 +96,7 @@ public class MageDpsCalc extends AbstractCalc
 	public int defenseRoll(CalcInput input)
 	{
 		NpcStats target = input.getNpcTarget();
-		return (target.getLevelMagic() + 9) * (target.getBonusDefenseMagic() + 64);
+		return (target.getLevelMagic() + 9) * (target.getDefenseMagic() + 64);
 	}
 
 	public int maxHit(CalcInput input)

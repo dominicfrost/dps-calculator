@@ -19,7 +19,6 @@ import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
-// todo convert to CustomJComboBox
 public class EquipmentSlotPanel extends JPanel
 {
 

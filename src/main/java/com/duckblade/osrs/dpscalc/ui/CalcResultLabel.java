@@ -3,7 +3,6 @@ package com.duckblade.osrs.dpscalc.ui;
 import com.duckblade.osrs.dpscalc.calc.CalcResult;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.util.function.Function;
 import javax.swing.Box;
 import javax.swing.BoxLayout;

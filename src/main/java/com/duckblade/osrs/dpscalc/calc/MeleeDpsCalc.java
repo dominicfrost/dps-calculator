@@ -124,11 +124,11 @@ public class MeleeDpsCalc extends AbstractCalc
 		switch (input.getWeaponMode().getMeleeStyle())
 		{
 			case STAB:
-				return defLevel * (input.getNpcTarget().getBonusDefenseStab() + 64);
+				return defLevel * (input.getNpcTarget().getDefenseStab() + 64);
 			case SLASH:
-				return defLevel * (input.getNpcTarget().getBonusDefenseSlash() + 64);
+				return defLevel * (input.getNpcTarget().getDefenseSlash() + 64);
 			case CRUSH:
-				return defLevel * (input.getNpcTarget().getBonusDefenseCrush() + 64);
+				return defLevel * (input.getNpcTarget().getDefenseCrush() + 64);
 			default:
 				throw new IllegalArgumentException("Invalid melee attack style");
 		}
