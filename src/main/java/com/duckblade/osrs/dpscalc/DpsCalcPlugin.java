@@ -18,6 +18,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.ImageUtil;
 
 @Slf4j
@@ -38,6 +39,12 @@ public class DpsCalcPlugin extends Plugin
 
 	@Inject
 	private NpcDataManager npcDataManager;
+	
+	@Inject
+	private OverlayManager overlayManager;
+	
+	@Inject
+	private DpsOverlay dpsOverlay;
 
 	private DpsPluginPanel panel;
 
@@ -57,6 +64,8 @@ public class DpsCalcPlugin extends Plugin
 				.panel(panel)
 				.build();
 		toolbar.addNavigation(navButton);
+		
+		overlayManager.add(dpsOverlay);
 
 		log.info("DPS Calculator started!");
 	}
@@ -65,6 +74,8 @@ public class DpsCalcPlugin extends Plugin
 	protected void shutDown()
 	{
 		toolbar.removeNavigation(navButton);
+		
+		overlayManager.remove(dpsOverlay);
 
 		log.info("DPS Calculator stopped!");
 	}
