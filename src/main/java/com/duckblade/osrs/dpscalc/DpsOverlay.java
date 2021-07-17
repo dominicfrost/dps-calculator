@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import net.runelite.api.Client;
-import net.runelite.api.NPC;
 import net.runelite.api.Skill;
 import net.runelite.api.events.HitsplatApplied;
 import net.runelite.api.events.InteractingChanged;
@@ -37,12 +36,7 @@ public class DpsOverlay extends Overlay
 	private Map currentTarget;
 
 	@Inject
-	public DpsOverlay(CalcManager calcManager,
-					  Client client,
-					  DpsCalcConfig config,
-					  EventBus eventBus,
-					  ItemDataManager itemDataManager,
-					  NpcDataManager npcDataManager)
+	public DpsOverlay(CalcManager calcManager, Client client, DpsCalcConfig config, EventBus eventBus, ItemDataManager itemDataManager, NpcDataManager npcDataManager)
 	{
 		eventBus.register(this);
 		this.client = client;

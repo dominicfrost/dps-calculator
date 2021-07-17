@@ -2,7 +2,9 @@ package com.duckblade.osrs.dpscalc.ui.equip;
 
 import com.duckblade.osrs.dpscalc.ItemDataManager;
 import com.duckblade.osrs.dpscalc.calc.EquipmentRequirement;
+import com.duckblade.osrs.dpscalc.client.CalcInputProvider;
 import com.duckblade.osrs.dpscalc.model.CombatMode;
+import com.duckblade.osrs.dpscalc.model.DartType;
 import com.duckblade.osrs.dpscalc.model.EquipmentStats;
 import com.duckblade.osrs.dpscalc.model.ItemStats;
 import com.duckblade.osrs.dpscalc.model.Spell;
@@ -16,6 +18,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.text.DecimalFormat;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -33,11 +36,7 @@ import javax.swing.SwingUtilities;
 import net.runelite.api.Client;
 import net.runelite.api.EquipmentInventorySlot;
 import net.runelite.api.GameState;
-import net.runelite.api.InventoryID;
-import net.runelite.api.Item;
-import net.runelite.api.ItemContainer;
 import net.runelite.api.ItemID;
-import net.runelite.api.VarPlayer;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.ui.ColorScheme;
@@ -48,6 +47,7 @@ public class EquipmentPanel extends JPanel
 	
 	private static final DecimalFormat STAT_LABEL_FORMAT = new DecimalFormat(": #.#");
 
+	private final CalcInputProvider calcInputProvider; // used for loadFromClient
 	private final Client client;
 	private final ClientThread clientThread;
 	private final ItemManager rlItemManager;
@@ -57,7 +57,7 @@ public class EquipmentPanel extends JPanel
 	private final CustomJCheckBox slayerCheck;
 	private final EquipmentSlotPanel weaponSlot;
 
-	private final CustomJComboBox<ItemStats> tbpDartSelectPanel;
+	private final CustomJComboBox<DartType> tbpDartSelectPanel;
 	private final CustomJComboBox<WeaponMode> weaponModeSelect;
 	private final CustomJComboBox<Spell> spellSelect;
 	
@@ -68,8 +68,9 @@ public class EquipmentPanel extends JPanel
 	private final JPanel totalsPanel;
 
 	@Inject
-	public EquipmentPanel(@Nullable Client client, @Nullable ClientThread clientThread, @Nullable ItemManager rlItemManager, ItemDataManager itemDataManager)
+	public EquipmentPanel(CalcInputProvider calcInputProvider, @Nullable Client client, @Nullable ClientThread clientThread, @Nullable ItemManager rlItemManager, ItemDataManager itemDataManager)
 	{
+		this.calcInputProvider = calcInputProvider;
 		this.client = client;
 		this.clientThread = clientThread;
 		this.rlItemManager = rlItemManager;
@@ -137,7 +138,7 @@ public class EquipmentPanel extends JPanel
 		dharokPanel.add(dharokMaxHpField);
 		dharokPanel.add(Box.createVerticalStrut(10));
 
-		tbpDartSelectPanel = new CustomJComboBox<>(itemDataManager.getAllDarts(), ItemStats::getName, "Blowpipe Darts");
+		tbpDartSelectPanel = new CustomJComboBox<>(Arrays.asList(DartType.values()), DartType::getName, "Blowpipe Darts");
 		tbpDartSelectPanel.setCallback(this::onEquipmentChanged);
 		tbpDartSelectPanel.setAlignmentX(CENTER_ALIGNMENT);
 		tbpDartSelectPanel.setVisible(false);
@@ -234,7 +235,8 @@ public class EquipmentPanel extends JPanel
 
 	public ItemStats getTbpDarts()
 	{
-		return tbpDartSelectPanel.getValue();
+		DartType selectedDarts = tbpDartSelectPanel.getValue();
+		return selectedDarts == null ? null : selectedDarts.getItemStats();
 	}
 
 	public Spell getSpell()
@@ -244,63 +246,30 @@ public class EquipmentPanel extends JPanel
 
 	public void loadFromClient()
 	{
-		// this method could maybe be refactored to not nest as much but meh 
-		
 		if (client == null || clientThread == null || client.getGameState() != GameState.LOGGED_IN)
+		{
 			return; // ui test, or not init yet somehow
+		}
 
 		clientThread.invokeLater(() ->
 		{
-			ItemContainer equipped = client.getItemContainer(InventoryID.EQUIPMENT);
-			if (equipped == null)
-				return;
+			Map<EquipmentInventorySlot, ItemStats> equipment = calcInputProvider.getPlayerEquipment();
+			slotPanels.forEach((slot, panel) -> panel.setValue(equipment.get(slot)));
 
-			slotPanels.forEach((slot, panel) ->
-			{
-				Item rlItem = equipped.getItem(slot.getSlotIdx());
-				if (rlItem == null)
-				{
-					panel.setValue(null);
-					return;
-				}
-
-				int canonicalId = rlItemManager.canonicalize(rlItem.getId());
-				ItemStats calcItem = itemDataManager.getItemStatsById(canonicalId);
-				panel.setValue(calcItem);
-			});
-			
-			// this is also done in onEquipmentChanged, but we trigger early so we can set value
 			ItemStats currentWeapon = weaponSlot.getValue();
-			List<WeaponMode> modes = updateWeaponModeComboBox(currentWeapon);
+			updateWeaponModeComboBox(currentWeapon); // this is also done in onEquipmentChanged, but we trigger early so we can set value
+			weaponModeSelect.setValue(calcInputProvider.getWeaponMode());
 
-			int weaponModeVarp = client.getVar(VarPlayer.ATTACK_STYLE);
-			modes.stream()
-					.filter(wm -> wm.getVarpValue() == weaponModeVarp)
-					.findAny()
-					.ifPresent(wm ->
-					{
-						weaponModeSelect.setValue(wm);
-						
-						if (wm.getMode() == CombatMode.MAGE)
-						{
-							List<Spell> availableSpells = updateSpellComboBox(currentWeapon, getEquipment());
-							int spellVarb = client.getVarbitValue(Spell.SPELL_SELECTED_VARBIT);
-							availableSpells.stream()
-									.filter(s -> s.getVarbValue() == spellVarb)
-									.findFirst()
-									.ifPresent(spellSelect::setValue);
-						}
-					});
-
+			updateSpellComboBox(currentWeapon, equipment);
+			spellSelect.setValue(calcInputProvider.getSpell());
 			onEquipmentChanged();
 		});
 	}
 	
-	private List<WeaponMode> updateWeaponModeComboBox(ItemStats currentWeapon)
+	private void updateWeaponModeComboBox(ItemStats currentWeapon)
 	{
 		List<WeaponMode> modes = currentWeapon == null ? WeaponType.UNARMED.getWeaponModes() : currentWeapon.getWeaponType().getWeaponModes();
 		weaponModeSelect.setItems(modes);
-		return modes;
 	}
 	
 	private List<Spell> updateSpellComboBox(ItemStats currentWeapon, Map<EquipmentInventorySlot, ItemStats> equipment)

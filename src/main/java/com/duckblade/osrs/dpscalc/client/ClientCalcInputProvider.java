@@ -45,11 +45,7 @@ public class ClientCalcInputProvider implements CalcInputProvider
 	private Integer lastNpcTarget;
 
 	@Inject
-	public ClientCalcInputProvider(Client client,
-								   DpsCalcConfig config,
-								   ItemDataManager itemDataManager,
-								   NpcDataManager npcDataManager,
-								   EventBus eventBus)
+	public ClientCalcInputProvider(Client client, DpsCalcConfig config, ItemDataManager itemDataManager, NpcDataManager npcDataManager, EventBus eventBus)
 	{
 		this.client = client;
 		this.config = config;
@@ -62,7 +58,7 @@ public class ClientCalcInputProvider implements CalcInputProvider
 	public CombatMode getCombatMode()
 	{
 		assert client.isClientThread();
-		return null; // todo
+		return getWeaponMode().getMode();
 	}
 
 	@Override
@@ -151,7 +147,12 @@ public class ClientCalcInputProvider implements CalcInputProvider
 	public Spell getSpell()
 	{
 		assert client.isClientThread();
-		return null; // todo
+
+		int spellVarb = client.getVarbitValue(Spell.SPELL_SELECTED_VARBIT);
+		return Arrays.stream(Spell.values())
+			.filter(s -> s.getVarbValue() == spellVarb)
+			.findAny()
+			.orElse(null);
 	}
 
 	@Override
